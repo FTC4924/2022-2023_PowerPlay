@@ -5,6 +5,7 @@ import android.os.Build;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
@@ -13,7 +14,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import androidx.annotation.RequiresApi;
 
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.RADIANS;
-import static org.firstinspires.ftc.teamcode.Constants.CONTROLLER_TOLERANCE;
+import static org.firstinspires.ftc.teamcode.Constants.CLAW_GRABBER_CLOSE_POSITION;
+import static org.firstinspires.ftc.teamcode.Constants.CLAW_GRABBER_OPEN_POSITION;
+import static org.firstinspires.ftc.teamcode.Constants.CLAW_ROTATOR_COLLECTING_POSITION;
+import static org.firstinspires.ftc.teamcode.Constants.CLAW_ROTATOR_SCORING_POSITION;
+import static org.firstinspires.ftc.teamcode.Constants.JOYSTICK_TOLERANCE;
+import static org.firstinspires.ftc.teamcode.Constants.SPEED;
 import static org.firstinspires.ftc.teamcode.Constants.TURNING_POWER_SCALAR;
 
 public abstract class TeleopBase extends OpMode {
@@ -25,6 +31,11 @@ public abstract class TeleopBase extends OpMode {
     private DcMotor leftBack;
     private DcMotor rightFront;
     private DcMotor rightBack;
+    private DcMotor armRotator;
+    private DcMotor armRaiser;
+    private Servo clawRotator;
+    private Servo clawGrabber;
+
 
     // Gyro sensor
     private BNO055IMU imu;
@@ -39,6 +50,9 @@ public abstract class TeleopBase extends OpMode {
     private boolean aPressed;
     private boolean bPressed;
 
+    private boolean clawGrabberOpen;
+    private boolean clawRotatorScoring;
+
     public void init() {
 
         allianceColor = getAllianceColor();
@@ -49,6 +63,21 @@ public abstract class TeleopBase extends OpMode {
         leftBack = hardwareMap.get(DcMotor.class, "leftBack");
         rightFront = hardwareMap.get(DcMotor.class, "rightFront");
         rightBack = hardwareMap.get(DcMotor.class, "rightBack");
+        armRotator = hardwareMap.get(DcMotor.class, "armRotator");
+        armRaiser = hardwareMap.get(DcMotor.class, "armRaiser");
+        clawRotator = hardwareMap.get(Servo.class, "clawRotator");
+        clawGrabber = hardwareMap.get(Servo.class, "clawGrabber");
+
+        armRotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        armRotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        armRotator.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        armRaiser.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        armRaiser.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        armRaiser.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        clawGrabberOpen = false;
+        clawRotatorScoring = false;
+
 
         // Initializing the RevHub IMU
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -78,6 +107,10 @@ public abstract class TeleopBase extends OpMode {
         recalibrateGyro();
 
         holonomicDrive();
+
+        arm();
+
+        claw();
 
     }
 
@@ -118,7 +151,7 @@ public abstract class TeleopBase extends OpMode {
         double rightFrontPower;
         double rightBackPower;
 
-        if (Math.abs(gamepad1LeftStickX) >= CONTROLLER_TOLERANCE || Math.abs(gamepad1LeftStickY) >= CONTROLLER_TOLERANCE) {
+        if (Math.abs(gamepad1LeftStickX) >= JOYSTICK_TOLERANCE || Math.abs(gamepad1LeftStickY) >= JOYSTICK_TOLERANCE) {
 
             // Uses atan2 to convert the x and y values of the controller to an angle
             double gamepad1LeftStickAngle = Math.atan2(gamepad1LeftStickY, gamepad1LeftStickX);
@@ -129,7 +162,7 @@ public abstract class TeleopBase extends OpMode {
             double holonomicAngle = gamepad1LeftStickAngle + currentRobotAngle + Math.PI / 4;
 
             // overall power based on how far the stick is from the center
-            double power = Math.sqrt(Math.pow(gamepad1LeftStickX, 2) + Math.pow(gamepad1LeftStickY, 2));
+            double power = Math.sqrt(Math.pow(gamepad1LeftStickX, 2) + Math.pow(gamepad1LeftStickY, 2)) * SPEED;
 
             // the main diagonal is the diagonal from top left to bottom right
             double mainDiagonalPercent = Math.cos(holonomicAngle);
@@ -150,10 +183,10 @@ public abstract class TeleopBase extends OpMode {
 
         }
 
-        if (gamepad1LeftTrigger >= CONTROLLER_TOLERANCE) {
+        if (gamepad1LeftTrigger >= JOYSTICK_TOLERANCE) {
             angleError += Math.pow(gamepad1LeftTrigger, 2);
         }
-        if (gamepad1RightTrigger >= CONTROLLER_TOLERANCE) {
+        if (gamepad1RightTrigger >= JOYSTICK_TOLERANCE) {
             angleError -= Math.pow(gamepad1RightTrigger, 2);
         }
 
@@ -169,5 +202,66 @@ public abstract class TeleopBase extends OpMode {
         rightBack.setPower(rightBackPower);
     }
 
+    /**
+     * Arm Controls
+     */
+    private void arm() {
+
+        /*
+        Linearly raises and lowers the arm :
+         */
+        if (Math.abs(gamepad2.left_stick_y) >= JOYSTICK_TOLERANCE) {
+            armRaiser.setPower(gamepad2.left_stick_y);
+        } else {
+            armRaiser.setPower(0.0);
+        }
+
+        /*
+        Rotates the arm
+         */
+        if (Math.abs(gamepad2.right_stick_x) >= JOYSTICK_TOLERANCE) {
+            armRotator.setPower(gamepad2.right_stick_x);
+        } else {
+            armRotator.setPower(0.0);
+        }
+    }
+
+    /**
+     * Claw Controls
+     */
+    private void claw() {
+        /*
+        Toggle for claw grabber (open and close)
+         */
+        if (gamepad2.y && !yPressed) {
+            yPressed = true;
+            if (clawGrabberOpen) {
+                clawGrabberOpen = false;
+                clawGrabber.setPosition(CLAW_GRABBER_CLOSE_POSITION);
+            } else {
+                clawGrabberOpen = true;
+                clawGrabber.setPosition((CLAW_GRABBER_OPEN_POSITION));
+            }
+        } else if (!gamepad2.y) {
+            yPressed = false;
+        }
+
+        /*
+        Claw Rotator Scoring
+         */
+        if (gamepad2.a && !aPressed) {
+            aPressed = true;
+            if (clawRotatorScoring) {
+                clawRotatorScoring = false;
+                clawRotator.setPosition(CLAW_ROTATOR_SCORING_POSITION);
+            } else {
+                clawRotatorScoring = true;
+                clawRotator.setPosition((CLAW_ROTATOR_COLLECTING_POSITION));
+            }
+        } else if (!gamepad2.a) {
+            aPressed = false;
+        }
+
+    }
     protected abstract AllianceColor getAllianceColor();
 }

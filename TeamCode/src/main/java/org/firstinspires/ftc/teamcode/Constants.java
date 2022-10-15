@@ -20,7 +20,7 @@ public class Constants {
      * Defines the dead zone for controller input.
      */
     @FloatRange(from=0.0, to=1.0)
-    protected static final double CONTROLLER_TOLERANCE = 0.05;
+    protected static final double JOYSTICK_TOLERANCE = 0.05;
     /**
      * Defines the tolerance for the angle error.
      */
@@ -34,6 +34,8 @@ public class Constants {
     public static final double TURNING_ENCODER_POSITION_SCALAR = 20.0;
     public static final double TURNING_POWER_SCALAR = 1;
 
+    public static final double SPEED = 0.5;
+
     /*
     All the constants below are part of image processing.
      */
@@ -42,5 +44,15 @@ public class Constants {
     public static final int RESOLUTION_WIDTH = 1280;
     public static final int RESOLUTION_HEIGHT = 960;
     public static final String WEBCAM_RECORDING_FILE = "/Movies/match_recording.mp4";
+
+    public static final double CLAW_GRABBER_OPEN_POSITION = 0;
+    public static final double CLAW_GRABBER_CLOSE_POSITION = 0;
+    public static final double CLAW_ROTATOR_SCORING_POSITION = 0;
+    public static final double CLAW_ROTATOR_COLLECTING_POSITION = 0;
+    public static final int ARM_ROTATOR_SCORING_POSITION = 0;
+    public static final int ARM_ROTATOR_COLLECTING_POSITION = 0;
+    public static final int ARM_RAISER_SCORING_POSITION = 0;
+    public static final int ARM_RAISER_COLLECTING_POSITION = 0;
+
 
 }
