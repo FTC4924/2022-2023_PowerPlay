@@ -14,7 +14,7 @@ public class Constants {
     /**
      * Number of motor encoder ticks per foot.
      */
-    public static final double TICKS_PER_FOOT = 0;
+    public static final double TICKS_PER_FOOT = 543.45;
 
     /**
      * Defines the dead zone for controller input.
@@ -45,14 +45,14 @@ public class Constants {
     public static final int RESOLUTION_HEIGHT = 960;
     public static final String WEBCAM_RECORDING_FILE = "/Movies/match_recording.mp4";
 
-    public static final double CLAW_GRABBER_OPEN_POSITION = 0;
-    public static final double CLAW_GRABBER_CLOSE_POSITION = 0;
-    public static final double CLAW_ROTATOR_SCORING_POSITION = 0;
-    public static final double CLAW_ROTATOR_COLLECTING_POSITION = 0;
+    public static final double CLAW_GRABBER_OPEN_POSITION = 1/3;
+    public static final double CLAW_GRABBER_CLOSE_POSITION = 1.0/2;
+    public static final double CLAW_ROTATOR_SCORING_POSITION = 1.0/3;
+    public static final double CLAW_ROTATOR_COLLECTING_POSITION = 1;
     public static final int ARM_ROTATOR_SCORING_POSITION = 0;
     public static final int ARM_ROTATOR_COLLECTING_POSITION = 0;
     public static final int ARM_RAISER_SCORING_POSITION = 0;
     public static final int ARM_RAISER_COLLECTING_POSITION = 0;
-
+    public static final double ARM_ROTATOR_SPEED = 2;
 
 }

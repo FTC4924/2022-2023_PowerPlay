@@ -14,6 +14,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import androidx.annotation.RequiresApi;
 
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.RADIANS;
+import static org.firstinspires.ftc.teamcode.Constants.ARM_ROTATOR_SPEED;
 import static org.firstinspires.ftc.teamcode.Constants.CLAW_GRABBER_CLOSE_POSITION;
 import static org.firstinspires.ftc.teamcode.Constants.CLAW_GRABBER_OPEN_POSITION;
 import static org.firstinspires.ftc.teamcode.Constants.CLAW_ROTATOR_COLLECTING_POSITION;
@@ -45,10 +46,8 @@ public abstract class TeleopBase extends OpMode {
     private double currentRobotAngle;
 
     // Toggle booleans
-    private boolean xPressed;
     private boolean yPressed;
     private boolean aPressed;
-    private boolean bPressed;
 
     private boolean clawGrabberOpen;
     private boolean clawRotatorScoring;
@@ -68,12 +67,12 @@ public abstract class TeleopBase extends OpMode {
         clawRotator = hardwareMap.get(Servo.class, "clawRotator");
         clawGrabber = hardwareMap.get(Servo.class, "clawGrabber");
 
-        armRotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armRotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        armRotator.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        armRaiser.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        armRotator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        armRotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armRaiser.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        armRaiser.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        armRaiser.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        armRaiser.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         clawGrabberOpen = false;
         clawRotatorScoring = false;
@@ -111,6 +110,8 @@ public abstract class TeleopBase extends OpMode {
         arm();
 
         claw();
+
+        telemetry.addData( "getCurrentPosition", armRaiser.getCurrentPosition());
 
     }
 
@@ -211,18 +212,22 @@ public abstract class TeleopBase extends OpMode {
         Linearly raises and lowers the arm :
          */
         if (Math.abs(gamepad2.left_stick_y) >= JOYSTICK_TOLERANCE) {
-            armRaiser.setPower(gamepad2.left_stick_y);
+            armRaiser.setPower(gamepad2.left_stick_y*-1);
         } else {
             armRaiser.setPower(0.0);
+
         }
 
         /*
         Rotates the arm
          */
         if (Math.abs(gamepad2.right_stick_x) >= JOYSTICK_TOLERANCE) {
-            armRotator.setPower(gamepad2.right_stick_x);
+            armRotator.setPower(gamepad2.right_stick_x/ARM_ROTATOR_SPEED);
+            telemetry.addData("armRotator", true);
         } else {
             armRotator.setPower(0.0);
+            telemetry.addData("armRotator", false);
+
         }
     }
 
@@ -235,6 +240,7 @@ public abstract class TeleopBase extends OpMode {
          */
         if (gamepad2.y && !yPressed) {
             yPressed = true;
+            telemetry.addData("clawGrabber", true);
             if (clawGrabberOpen) {
                 clawGrabberOpen = false;
                 clawGrabber.setPosition(CLAW_GRABBER_CLOSE_POSITION);
@@ -244,6 +250,8 @@ public abstract class TeleopBase extends OpMode {
             }
         } else if (!gamepad2.y) {
             yPressed = false;
+            telemetry.addData("clawGrabber", false);
+
         }
 
         /*
@@ -251,6 +259,7 @@ public abstract class TeleopBase extends OpMode {
          */
         if (gamepad2.a && !aPressed) {
             aPressed = true;
+            telemetry.addData("clawRotator", true);
             if (clawRotatorScoring) {
                 clawRotatorScoring = false;
                 clawRotator.setPosition(CLAW_ROTATOR_SCORING_POSITION);
@@ -260,6 +269,8 @@ public abstract class TeleopBase extends OpMode {
             }
         } else if (!gamepad2.a) {
             aPressed = false;
+            telemetry.addData("clawRotator", false);
+
         }
 
     }
