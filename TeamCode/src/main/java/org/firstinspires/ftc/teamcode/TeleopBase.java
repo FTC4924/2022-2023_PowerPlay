@@ -14,7 +14,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import androidx.annotation.RequiresApi;
 
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.RADIANS;
-import static org.firstinspires.ftc.teamcode.Constants.ARM_ROTATOR_SPEED;
+import static org.firstinspires.ftc.teamcode.Constants.ARM_CORRECTIVE_POWER;
 import static org.firstinspires.ftc.teamcode.Constants.CLAW_GRABBER_CLOSE_POSITION;
 import static org.firstinspires.ftc.teamcode.Constants.CLAW_GRABBER_OPEN_POSITION;
 import static org.firstinspires.ftc.teamcode.Constants.CLAW_ROTATOR_COLLECTING_POSITION;
@@ -51,6 +51,8 @@ public abstract class TeleopBase extends OpMode {
 
     private boolean clawGrabberOpen;
     private boolean clawRotatorScoring;
+    private boolean leftStickYAtRest;
+    private boolean rightStickXAtRest;
 
     public void init() {
 
@@ -68,14 +70,16 @@ public abstract class TeleopBase extends OpMode {
         clawGrabber = hardwareMap.get(Servo.class, "clawGrabber");
 
         armRotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        armRotator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        armRotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        armRotator.setTargetPosition(0);
+        armRotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         armRaiser.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        armRaiser.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        armRaiser.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        armRaiser.setTargetPosition(0);
+        armRaiser.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         clawGrabberOpen = false;
         clawRotatorScoring = false;
+        leftStickYAtRest = true;
+        rightStickXAtRest = true;
 
 
         // Initializing the RevHub IMU
@@ -212,22 +216,32 @@ public abstract class TeleopBase extends OpMode {
         Linearly raises and lowers the arm :
          */
         if (Math.abs(gamepad2.left_stick_y) >= JOYSTICK_TOLERANCE) {
+            if (leftStickYAtRest) {
+                armRaiser.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                leftStickYAtRest = false;
+            }
             armRaiser.setPower(gamepad2.left_stick_y*-1);
-        } else {
-            armRaiser.setPower(0.0);
-
+        } else if (!leftStickYAtRest){
+            armRaiser.setTargetPosition(armRaiser.getCurrentPosition());
+            armRaiser.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            armRaiser.setPower(ARM_CORRECTIVE_POWER);
+            leftStickYAtRest = true;
         }
 
         /*
         Rotates the arm
          */
         if (Math.abs(gamepad2.right_stick_x) >= JOYSTICK_TOLERANCE) {
-            armRotator.setPower(gamepad2.right_stick_x/ARM_ROTATOR_SPEED);
-            telemetry.addData("armRotator", true);
-        } else {
-            armRotator.setPower(0.0);
-            telemetry.addData("armRotator", false);
-
+            if (rightStickXAtRest) {
+                armRotator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                rightStickXAtRest = false;
+            }
+            armRotator.setPower(gamepad2.right_stick_x*-1);
+        } else if (!rightStickXAtRest){
+            armRotator.setTargetPosition(armRaiser.getCurrentPosition());
+            armRotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            armRotator.setPower(ARM_CORRECTIVE_POWER);
+            rightStickXAtRest = true;
         }
     }
 
