@@ -11,6 +11,14 @@ import androidx.annotation.FloatRange;
  */
 
 public class Constants {
+
+    public enum CONTROLLER_ELEMENT_STATE {
+        IDLE,
+        PRESSED,
+        HELD,
+        RELEASED
+    }
+
     /**
      * Number of motor encoder ticks per foot.
      */
@@ -20,7 +28,7 @@ public class Constants {
      * Defines the dead zone for controller input.
      */
     @FloatRange(from=0.0, to=1.0)
-    protected static final double JOYSTICK_TOLERANCE = 0.05;
+    protected static final double ANALOG_THRESHOLD = 0.05;
     /**
      * Defines the tolerance for the angle error.
      */
