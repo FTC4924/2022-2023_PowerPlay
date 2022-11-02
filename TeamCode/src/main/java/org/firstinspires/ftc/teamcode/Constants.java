@@ -19,6 +19,23 @@ public class Constants {
         RELEASED
     }
 
+    public enum TELEOP_STATE {
+        MANUAL,
+        AUTO
+    }
+
+    public enum SignalSide {
+        SIDE_R(GREEN),
+        SIDE_B(BLUE),
+        SIDE_P(RED);
+
+        public final Scalar color;
+
+        private SignalSide(Scalar color) {
+            this.color = color;
+        }
+    }
+
     /**
      * Number of motor encoder ticks per foot.
      */
@@ -47,8 +64,14 @@ public class Constants {
     /*
     All the constants below are part of image processing.
      */
+    public static final Scalar RED = new Scalar(255, 0, 0);
     public static final Scalar GREEN = new Scalar(0, 255, 0);
+    public static final Scalar BLUE = new Scalar(0, 0, 255);
+    public static final Scalar YELLOW = new Scalar(255, 255, 0);
     public static final Rect ROI = new Rect(new Point(0,665), new Point(960,840));
+    public static final int RED_CHANNEL = 0;
+    public static final int GREEN_CHANNEL = 1;
+    public static final int BLUE_CHANNEL = 2;
     public static final int RESOLUTION_WIDTH = 1280;
     public static final int RESOLUTION_HEIGHT = 960;
     public static final String WEBCAM_RECORDING_FILE = "/Movies/match_recording.mp4";

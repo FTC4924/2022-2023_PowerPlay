@@ -8,6 +8,8 @@ import static org.firstinspires.ftc.teamcode.Constants.CONTROLLER_ELEMENT_STATE.
 
 
 public class AnalogComponent {
+    double component;
+
     private Constants.CONTROLLER_ELEMENT_STATE state;
 
     public AnalogComponent() {
@@ -30,6 +32,7 @@ public class AnalogComponent {
                 state = active ? HELD : RELEASED;
                 break;
             case HELD:
+                this.component = component;
                 if (!active) state = RELEASED;
                 break;
             case RELEASED:

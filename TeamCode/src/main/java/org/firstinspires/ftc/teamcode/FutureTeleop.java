@@ -5,6 +5,7 @@ import android.os.Build;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -15,6 +16,7 @@ import androidx.annotation.RequiresApi;
 
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.RADIANS;
 import static org.firstinspires.ftc.teamcode.Constants.ANALOG_THRESHOLD;
+import static org.firstinspires.ftc.teamcode.Constants.ARM_CORRECTIVE_POWER;
 import static org.firstinspires.ftc.teamcode.Constants.ARM_RAISER_COLLECTING_POSITION;
 import static org.firstinspires.ftc.teamcode.Constants.ARM_RAISER_SCORING_POSITION;
 import static org.firstinspires.ftc.teamcode.Constants.ARM_ROTATOR_COLLECTING_POSITION;
@@ -24,6 +26,7 @@ import static org.firstinspires.ftc.teamcode.Constants.CLAW_GRABBER_OPEN_POSITIO
 import static org.firstinspires.ftc.teamcode.Constants.CLAW_ROTATOR_COLLECTING_POSITION;
 import static org.firstinspires.ftc.teamcode.Constants.CLAW_ROTATOR_SCORING_POSITION;
 import static org.firstinspires.ftc.teamcode.Constants.SPEED;
+import static org.firstinspires.ftc.teamcode.Constants.TELEOP_STATE.AUTO;
 import static org.firstinspires.ftc.teamcode.Constants.TURNING_POWER_SCALAR;
 
 public abstract class FutureTeleop extends OpMode {
@@ -32,6 +35,8 @@ public abstract class FutureTeleop extends OpMode {
 
     private Gamepad g1;
     private Gamepad g2;
+
+    private Constants.TELEOP_STATE state;
 
     // Motors
     private DcMotor leftFront;
@@ -43,7 +48,6 @@ public abstract class FutureTeleop extends OpMode {
     private Servo clawRotator;
     private Servo clawGrabber;
 
-
     // Gyro sensor
     private BNO055IMU imu;
 
@@ -52,22 +56,16 @@ public abstract class FutureTeleop extends OpMode {
     private double currentRobotAngle;
 
     // Toggle booleans
-    private boolean xPressed;
-    private boolean yPressed;
-    private boolean aPressed;
-    private boolean bPressed;
-
     private boolean clawGrabberOpen;
     private boolean clawRotatorScoring;
     private boolean armRotatorScoring;
     private boolean armRaiserScoring;
 
-    private boolean manual;
-
     public void init() {
 
         g1 = new Gamepad(gamepad1);
         g2 = new Gamepad(gamepad2);
+        state = AUTO;
 
         allianceColor = getAllianceColor();
 
@@ -85,9 +83,11 @@ public abstract class FutureTeleop extends OpMode {
         armRotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armRotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         armRotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armRotator.setDirection(DcMotorSimple.Direction.REVERSE);
         armRaiser.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armRaiser.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         armRaiser.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armRaiser.setDirection(DcMotorSimple.Direction.REVERSE);
 
         clawGrabberOpen = false;
         clawRotatorScoring = false;
@@ -123,24 +123,37 @@ public abstract class FutureTeleop extends OpMode {
 
         getAngle();
 
-        recalibrateGyro();
+        switch (g1.b.getState()) {
+            case PRESSED:
+                recalibrateGyro();
+                break;
+        }
 
         holonomicDrive();
 
         switch (g2.x.getState()) {
             case PRESSED:
-                manual = !manual;
-                if (manual) {
-                    armRotator.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    armRaiser.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                } else {
-                    armRotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    armRaiser.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                switch (state) {
+                    case MANUAL:
+                        armRotator.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                        armRaiser.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                        break;
+                    case AUTO:
+                        armRotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        armRaiser.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        break;
                 }
+        }
+
+        switch (state){
+            case MANUAL:
+                manualLoop();
+                break;
+            case AUTO:
+                autoLoop();
                 break;
 
         }
-
 
         switch(g2.y.getState())  {
             case PRESSED:
@@ -148,21 +161,51 @@ public abstract class FutureTeleop extends OpMode {
                 break;
         }
 
-
-        if (gamepad2.a && !aPressed) {
-            aPressed = true;
-            if (manual) {
+        switch (g2.b.getState()) {
+            case PRESSED:
                 clawRotate();
-            } else {
-                clawRotate();
-                armRotate();
-                armRaise();
-            }
-        } else if (!gamepad2.a) {
-            aPressed = false;
+                break;
         }
     }
 
+    private void manualLoop() {
+        switch (g2.left_stick_y.getState()) {
+            case PRESSED:
+                armRaiser.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                break;
+            case HELD:
+                armRaiser.setPower(g2.left_stick_y.component);
+                break;
+            case RELEASED:
+                armRaiser.setTargetPosition(armRaiser.getCurrentPosition());
+                armRaiser.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                armRaiser.setPower(ARM_CORRECTIVE_POWER);
+                break;
+        }
+
+        switch (g2.right_stick_x.getState()) {
+            case PRESSED:
+                armRotator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                break;
+            case HELD:
+                armRotator.setPower(g2.right_stick_x.component);
+                break;
+            case RELEASED:
+                armRotator.setTargetPosition(armRotator.getCurrentPosition());
+                armRotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                armRotator.setPower(ARM_CORRECTIVE_POWER);
+                break;
+        }
+    }
+
+    private void autoLoop() {
+        switch (g2.b.getState()) {
+            case PRESSED:
+                armRotate();
+                armRaise();
+                break;
+        }
+    }
     /**
      * Gets the angle of the robot from the rev imu and subtracts the angle offset.
      */
@@ -175,9 +218,7 @@ public abstract class FutureTeleop extends OpMode {
      * Sets the gyro angle offset based off of the current angle when the b button is pressed.
      */
     private void recalibrateGyro() {
-        if(gamepad1.b) {
-            angleOffset = angles.firstAngle;
-        }
+        angleOffset = angles.firstAngle;
     }
 
     /**
@@ -199,6 +240,8 @@ public abstract class FutureTeleop extends OpMode {
         double leftBackPower ;
         double rightFrontPower;
         double rightBackPower;
+
+
 
         if (Math.abs(gamepad1LeftStickX) >= ANALOG_THRESHOLD || Math.abs(gamepad1LeftStickY) >= ANALOG_THRESHOLD) {
 
@@ -249,23 +292,16 @@ public abstract class FutureTeleop extends OpMode {
         leftBack.setPower(leftBackPower);
         rightFront.setPower(rightFrontPower);
         rightBack.setPower(rightBackPower);
+
     }
+
 
     /**
      * Arm Controls
      */
     private void armRaise() {
-        if (manual) {
-            if (Math.abs(gamepad2.right_stick_y) >= ANALOG_THRESHOLD) {
-                armRaiser.setPower(gamepad2.right_stick_y);
-            } else {
-                armRaiser.setPower(0.0);
-            }
-        }
-
         if (armRaiserScoring) {
             armRaiserScoring = false;
-
             armRaiser.setTargetPosition(ARM_RAISER_SCORING_POSITION);
         } else {
             armRaiserScoring = true;
@@ -275,53 +311,32 @@ public abstract class FutureTeleop extends OpMode {
 
 
     private void armRotate() {
-        if (manual) {
-            if (Math.abs(gamepad2.right_stick_x) >= ANALOG_THRESHOLD) {
-                armRotator.setPower(gamepad2.right_stick_x);
-            } else {
-                armRotator.setPower(0.0);
-            }
+        if (armRotatorScoring) {
+            armRotatorScoring = false;
+            armRotator.setTargetPosition((ARM_ROTATOR_SCORING_POSITION));
         } else {
-            if (armRotatorScoring) {
-                armRotatorScoring = false;
-                armRotator.setTargetPosition((ARM_ROTATOR_SCORING_POSITION));
-            } else {
-                armRotatorScoring = true;
-                armRotator.setTargetPosition((ARM_ROTATOR_COLLECTING_POSITION));
-            }
+            armRotatorScoring = true;
+            armRotator.setTargetPosition((ARM_ROTATOR_COLLECTING_POSITION));
         }
     }
 
     /**
      * Claw Controls
      */
-    private void clawRotate() {
-        if (manual) {
-            if (clawRotatorScoring) {
-                clawRotatorScoring = false;
-                clawRotator.setPosition(CLAW_ROTATOR_SCORING_POSITION);
-            } else {
-                clawRotatorScoring = true;
-                clawRotator.setPosition((CLAW_ROTATOR_COLLECTING_POSITION));
-            }
-        }
-
+    private void clawRotate()   {
         if (clawRotatorScoring) {
             clawRotatorScoring = false;
-
             clawRotator.setPosition(CLAW_ROTATOR_SCORING_POSITION);
         } else {
             clawRotatorScoring = true;
             clawRotator.setPosition((CLAW_ROTATOR_COLLECTING_POSITION));
         }
-
     }
 
     /**
      * Toggle for claw grabber (open and close)
      */
     private void clawGrabber() {
-        yPressed = true;
         if (clawGrabberOpen) {
             clawGrabberOpen = false;
             clawGrabber.setPosition(CLAW_GRABBER_CLOSE_POSITION);
@@ -329,7 +344,7 @@ public abstract class FutureTeleop extends OpMode {
             clawGrabberOpen = true;
             clawGrabber.setPosition((CLAW_GRABBER_OPEN_POSITION));
         }
-
     }
+
     protected abstract AllianceColor getAllianceColor();
 }
