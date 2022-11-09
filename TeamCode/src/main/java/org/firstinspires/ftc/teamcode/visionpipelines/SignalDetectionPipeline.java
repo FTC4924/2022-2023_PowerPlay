@@ -16,11 +16,11 @@ import static org.firstinspires.ftc.teamcode.Constants.YELLOW;
 public class SignalDetectionPipeline extends OpenCvPipeline
 {
 
-    public static int redMean;
-    public static int greenMean;
-    public static int blueMean;
+    public int redMean;
+    public int greenMean;
+    public int blueMean;
 
-    private static volatile SignalSide signalSide = null;
+    private volatile SignalSide signalSide = null;
 
     void inputToCb(Mat input) {
         Scalar means = Core.mean(input.submat(ROI));
@@ -63,7 +63,7 @@ public class SignalDetectionPipeline extends OpenCvPipeline
         return input;
     }
 
-    public static SignalSide getSignaeSide()
+    public SignalSide getSignalSide()
     {
         return signalSide;
     }

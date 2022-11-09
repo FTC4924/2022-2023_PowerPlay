@@ -3,8 +3,6 @@ package org.firstinspires.ftc.teamcode;
 import android.os.Build;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
 
 import org.firstinspires.ftc.teamcode.Commands.Command;
 import org.firstinspires.ftc.teamcode.Subsystems.Camera;
@@ -31,7 +29,7 @@ public abstract class AutoBase extends OpMode {
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void init() {
 
-        DcMotor armRotator = hardwareMap.get(DcMotor.class, "armRotator");
+        /*DcMotor armRotator = hardwareMap.get(DcMotor.class, "armRotator");
         armRotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armRotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         armRotator.setTargetPosition(0);
@@ -49,7 +47,7 @@ public abstract class AutoBase extends OpMode {
         armTouch.setMode(DigitalChannel.Mode.INPUT);
 
         DigitalChannel duckWheelTouch = hardwareMap.get(DigitalChannel.class, "duckWheelTouch");
-        duckWheelTouch.setMode(DigitalChannel.Mode.INPUT);
+        duckWheelTouch.setMode(DigitalChannel.Mode.INPUT);*/
 
         resourceManager = new ResourceManager(telemetry, getAllianceColor(), hardwareMap);
 

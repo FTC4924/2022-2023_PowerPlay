@@ -11,6 +11,7 @@ public class Gamepad {
             right_trigger, left_trigger;
 
     public Gamepad(com.qualcomm.robotcore.hardware.Gamepad gamepad) {
+        this.gamepad = gamepad;
         a = new BinaryComponent();
         b = new BinaryComponent();
         x = new BinaryComponent();

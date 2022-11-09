@@ -27,9 +27,10 @@ import static org.firstinspires.ftc.teamcode.Constants.CLAW_ROTATOR_COLLECTING_P
 import static org.firstinspires.ftc.teamcode.Constants.CLAW_ROTATOR_SCORING_POSITION;
 import static org.firstinspires.ftc.teamcode.Constants.SPEED;
 import static org.firstinspires.ftc.teamcode.Constants.TELEOP_STATE.AUTO;
+import static org.firstinspires.ftc.teamcode.Constants.TELEOP_STATE.MANUAL;
 import static org.firstinspires.ftc.teamcode.Constants.TURNING_POWER_SCALAR;
 
-public abstract class FutureTeleop extends OpMode {
+public abstract class TeleopBase extends OpMode {
 
     protected static AllianceColor allianceColor;
 
@@ -80,13 +81,19 @@ public abstract class FutureTeleop extends OpMode {
         clawRotator = hardwareMap.get(Servo.class, "clawRotator");
         clawGrabber = hardwareMap.get(Servo.class, "clawGrabber");
 
+
+
         armRotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armRotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        armRotator.setTargetPosition(0);
         armRotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armRotator.setPower(ARM_CORRECTIVE_POWER);
         armRotator.setDirection(DcMotorSimple.Direction.REVERSE);
         armRaiser.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armRaiser.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        armRaiser.setTargetPosition(0);
         armRaiser.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        armRaiser.setPower(ARM_CORRECTIVE_POWER);
         armRaiser.setDirection(DcMotorSimple.Direction.REVERSE);
 
         clawGrabberOpen = false;
@@ -109,6 +116,7 @@ public abstract class FutureTeleop extends OpMode {
         currentRobotAngle = 0.0;
         angleOffset = allianceColor.angleOffset;
 
+
     }
 
     public void start() {
@@ -117,6 +125,8 @@ public abstract class FutureTeleop extends OpMode {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void loop() {
+
+        telemetry.addData("MANUAL/AUTO: ", state);
 
         g1.update();
         g2.update();
@@ -131,16 +141,22 @@ public abstract class FutureTeleop extends OpMode {
 
         holonomicDrive();
 
+        telemetry.addData("g2x", g2.x.getState());
+
         switch (g2.x.getState()) {
             case PRESSED:
                 switch (state) {
                     case MANUAL:
-                        armRotator.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                        armRaiser.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                        break;
-                    case AUTO:
+                        state = AUTO;
+                        armRotator.setPower(ARM_CORRECTIVE_POWER);
+                        armRaiser.setPower(ARM_CORRECTIVE_POWER);
                         armRotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                         armRaiser.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        break;
+                    case AUTO:
+                        state = MANUAL;
+                        armRotator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        armRaiser.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                         break;
                 }
         }
@@ -205,6 +221,8 @@ public abstract class FutureTeleop extends OpMode {
                 armRaise();
                 break;
         }
+        telemetry.addData("motormode", armRaiser.getMode());
+        telemetry.addData("armRaiserpos", armRaiser.getTargetPosition());
     }
     /**
      * Gets the angle of the robot from the rev imu and subtracts the angle offset.
