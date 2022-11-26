@@ -7,7 +7,9 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Subsystems.Subsystem;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -16,8 +18,16 @@ import androidx.annotation.Nullable;
 
 public class ResourceManager {
 
+    private static final ArrayList<String> IGNORE_DEVICES = new ArrayList<>(Arrays.asList(
+            "Control Hub",
+            "Control Hub Portal",
+            "Expansion Hub 1"
+    ));
+
     public Telemetry telemetry;
     public AllianceColor allianceColor;
+
+    private final HardwareMap hardwareMap;
 
     private final HashMap<String, HardwareDevice> idleDevices;
     private final HashMap<String, HardwareDevice> activeDevices;
@@ -27,11 +37,20 @@ public class ResourceManager {
     public ResourceManager(Telemetry telemetry, AllianceColor allianceColor, HardwareMap hardwareMap) {
         this.telemetry = telemetry;
         this.allianceColor = allianceColor;
+        this.hardwareMap = hardwareMap;
 
         idleDevices = new HashMap<>();
         //Adds all HardwareDevices in HardwareMap to allDevices
+        /*WebcamName webcam = hardwareMap.get(WebcamName.class, "Webcam 1");
+        idleDevices.put(webcam.getDeviceName(), webcam);
+        telemetry.addData("Starting iteration", "");
+        Log.i("TeamCode", "ResourceManager: Starting Iteration");*/
         for (HardwareDevice device : hardwareMap) {
-            idleDevices.put(device.getDeviceName(), device);
+            String names = hardwareMap.getNamesOf(device).iterator().next();
+            if (!IGNORE_DEVICES.contains(names)) {
+                idleDevices.put(names, device);
+                telemetry.addData("Added Device", names + " : " + device.getDeviceName() + " ;; " + hardwareMap.getNamesOf(device).size());
+            }
         }
 
         activeDevices = new HashMap<>();
@@ -59,7 +78,7 @@ public class ResourceManager {
      * @param subsystems The subsystem(s) to add to the manager.
      */
     public void addSubsystems(@NonNull Subsystem... subsystems) {
-        for(Subsystem subsystem : subsystems) {
+        for (Subsystem subsystem : subsystems) {
             idleSubsystems.put(subsystem.getName(), subsystem);
         }
     }
@@ -85,7 +104,10 @@ public class ResourceManager {
      */
     public void addDevices(@NonNull HardwareDevice... devices) {
         for(HardwareDevice device : devices) {
-            idleDevices.put(device.getDeviceName(), device);
+            Iterator<String> names = hardwareMap.getNamesOf(device).iterator();
+            if (IGNORE_DEVICES.contains(names.next())) {
+                idleDevices.put(names.next(), device);
+            }
         }
     }
 
@@ -119,12 +141,15 @@ public class ResourceManager {
      */
     public List<String> getActive() {
         List<String> names = new ArrayList<>();
-        for(HardwareDevice device : activeDevices.values()) {
-            names.add(device.getDeviceName());
-        }
-        for(Subsystem subsystem : activeSubsystems.values()) {
-            names.add(subsystem.getName());
-        }
+        names.addAll(activeDevices.keySet());
+        names.addAll(activeSubsystems.keySet());
+        return names;
+    }
+
+    public List<String> getIdle() {
+        List<String> names = new ArrayList<>();
+        names.addAll(idleDevices.keySet());
+        names.addAll(idleSubsystems.keySet());
         return names;
     }
 }

@@ -161,7 +161,7 @@ public class Drive extends Subsystem {
      */
     public void setMotorPowers(@Size(min = 4) double... powers) {
         for (int i = 0; i < motors.length; i++) {
-            motors[i].setPower((int) Math.round(powers[i]));
+            motors[i].setPower(powers[i]);
         }
     }
 

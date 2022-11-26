@@ -38,6 +38,8 @@ public class Move extends Command { // TODO: 3/24/22 Needs verification that thi
         drive = resourceManager.removeSubsystem(Drive.class, "drive");
         if (drive == null) return false;
 
+        if (useCurrentAngle) angle = drive.getHeading();
+
         double targetPosition = distance * TICKS_PER_FOOT;
 
         /*Subtracts the robot's current angle from the command angle so that it travels globally

@@ -5,9 +5,7 @@ import android.os.Build;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.Commands.Command;
-import org.firstinspires.ftc.teamcode.Subsystems.Camera;
 import org.firstinspires.ftc.teamcode.Subsystems.Drive;
-import org.firstinspires.ftc.teamcode.Subsystems.LedMatrix;
 
 import androidx.annotation.RequiresApi;
 
@@ -48,20 +46,19 @@ public abstract class AutoBase extends OpMode {
 
         DigitalChannel duckWheelTouch = hardwareMap.get(DigitalChannel.class, "duckWheelTouch");
         duckWheelTouch.setMode(DigitalChannel.Mode.INPUT);*/
-
         resourceManager = new ResourceManager(telemetry, getAllianceColor(), hardwareMap);
 
         resourceManager.addSubsystems(
-                new Camera(resourceManager, "Webcam 1", hardwareMap),
-                new Drive(resourceManager, "drive", hardwareMap),
-                new LedMatrix(resourceManager, "display")
+                //new Camera(resourceManager, "Webcam 1", hardwareMap)/*,
+                new Drive(resourceManager, "drive", hardwareMap)/*,
+                //new LedMatrix(resourceManager, "display")*/
         );
 
         command = getCommand();
     }
 
     @Override
-    public void start() { command.start(resourceManager); }
+    public void start() { if (!command.start(resourceManager)) requestOpModeStop(); }
 
     @Override
     public void loop() {
@@ -73,7 +70,8 @@ public abstract class AutoBase extends OpMode {
 
         // Runs the loop method of all subsystems that have overridden it.
         resourceManager.loopSubsystems();
-        telemetry.addData("active", resourceManager.getActive());
+        telemetry.addData("Active", resourceManager.getActive());
+        telemetry.addData("Idle", resourceManager.getIdle());
 
     }
 

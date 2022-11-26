@@ -46,9 +46,9 @@ public class Gamepad {
         right_stick_button.update(gamepad.right_stick_button);
         left_stick_button.update(gamepad.left_stick_button);
         left_stick_x.update(gamepad.left_stick_x);
-        left_stick_y.update(gamepad.left_stick_y);
+        left_stick_y.update(gamepad.left_stick_y * -1);
         right_stick_x.update(gamepad.right_stick_x);
-        right_stick_y.update(gamepad.right_stick_y);
+        right_stick_y.update(gamepad.right_stick_y * -1);
         right_trigger.update(gamepad.right_trigger);
         left_trigger.update(gamepad.left_trigger);
     }

@@ -7,15 +7,10 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.Constants.SignalSide;
 import org.firstinspires.ftc.teamcode.ResourceManager;
 import org.firstinspires.ftc.teamcode.visionpipelines.SignalDetectionPipeline;
-import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 import androidx.annotation.NonNull;
-
-import static org.firstinspires.ftc.teamcode.Constants.RESOLUTION_HEIGHT;
-import static org.firstinspires.ftc.teamcode.Constants.RESOLUTION_WIDTH;
 
 /*
  * Created by Brendan Clark on 02/27/2022 at 10:35 AM.
@@ -27,9 +22,10 @@ import static org.firstinspires.ftc.teamcode.Constants.RESOLUTION_WIDTH;
  * @see Subsystem
  */
 public class Camera extends Subsystem {
-    OpenCvWebcam webcam;
+    private final OpenCvWebcam webcam;
 
-    SignalDetectionPipeline pipeline;
+    private SignalDetectionPipeline pipeline;
+    private volatile boolean streaming;
 
 
     /**
@@ -43,27 +39,33 @@ public class Camera extends Subsystem {
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(resourceManager.removeDevice(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+        if (webcam == null) telemetry.addData(name, webcam);
 
         pipeline = new SignalDetectionPipeline();
         webcam.setPipeline(pipeline);
-        webcam.setMillisecondsPermissionTimeout(2500);
-        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+        webcam.setMillisecondsPermissionTimeout(2500);     /////// Diagnosing mystery error that has no origin, but is in the below commented out section.
+        /*webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {     ////// FOUND    "Webcam 1" is registered in the resource manager as "Sonix Technology Co., Ltd. USB 2.0 Camera". Likely source of above issue.
             @Override
             public void onOpened() {
                 webcam.startStreaming(RESOLUTION_WIDTH, RESOLUTION_HEIGHT, OpenCvCameraRotation.SIDEWAYS_RIGHT);
                 telemetry.addData(name, "Setup Finished");
+                streaming = true;
             }
 
             public void onError(int errorCode) {
                 telemetry.speak("The web cam wasn't initialised correctly! Error code: " + errorCode);
                 telemetry.addData(name, "Setup Failed! Error code: " + errorCode);
+                streaming = true;
             }
-        });
+        });*/
+
+        //while (!streaming) {}  // Wait until the webcam has finished opening and is streaming.
+
     }
 
     @Override
     public void loop() {
-        telemetry.addData(name, getSignal().toString());
+        if (streaming) telemetry.addData(name, getSignal().toString());
     }
 
     @Override
@@ -81,6 +83,6 @@ public class Camera extends Subsystem {
      * @see OpenCvWebcam#stopStreaming()
      */
     public void stopStreaming() {
-        webcam.stopStreaming();
+        //if (streaming) webcam.stopStreaming();
     }
 }

@@ -12,12 +12,12 @@ import androidx.annotation.IntRange;
 public enum AllianceColor {
 
     BLUE(1,
-            -90,
+            180,
             .625,
             RevBlinkinLedDriver.BlinkinPattern.LIGHT_CHASE_BLUE
     ),
     RED(0,
-            90,
+            180,
             .45,
             RevBlinkinLedDriver.BlinkinPattern.LIGHT_CHASE_RED
     );
@@ -44,7 +44,7 @@ public enum AllianceColor {
      * Construct an alliance.
      *
      * @param direction       See {@linkplain AllianceColor#direction}.
-     * @param angleOffset     See {@linkplain AllianceColor#angleOffset}.
+     * @param angleOffset     See {@linkplain AllianceColor#angleOffset} (Degrees).
      * @param distanceToDucks See {@linkplain AllianceColor#distanceToDucks}.
      * @param pattern         See {@linkplain AllianceColor#pattern}.
      */

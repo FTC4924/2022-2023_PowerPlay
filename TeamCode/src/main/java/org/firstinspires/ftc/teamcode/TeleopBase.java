@@ -5,7 +5,6 @@ import android.os.Build;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -17,7 +16,12 @@ import androidx.annotation.RequiresApi;
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.RADIANS;
 import static org.firstinspires.ftc.teamcode.Constants.ANALOG_THRESHOLD;
 import static org.firstinspires.ftc.teamcode.Constants.ARM_CORRECTIVE_POWER;
+import static org.firstinspires.ftc.teamcode.Constants.ARM_POWER;
 import static org.firstinspires.ftc.teamcode.Constants.ARM_RAISER_COLLECTING_POSITION;
+import static org.firstinspires.ftc.teamcode.Constants.ARM_RAISER_LOWER_SPEED;
+import static org.firstinspires.ftc.teamcode.Constants.ARM_RAISER_MAX_POSITION;
+import static org.firstinspires.ftc.teamcode.Constants.ARM_RAISER_MIN_POSITION;
+import static org.firstinspires.ftc.teamcode.Constants.ARM_RAISER_RAISE_SPEED;
 import static org.firstinspires.ftc.teamcode.Constants.ARM_RAISER_SCORING_POSITION;
 import static org.firstinspires.ftc.teamcode.Constants.ARM_ROTATOR_COLLECTING_POSITION;
 import static org.firstinspires.ftc.teamcode.Constants.ARM_ROTATOR_SCORING_POSITION;
@@ -25,7 +29,11 @@ import static org.firstinspires.ftc.teamcode.Constants.CLAW_GRABBER_CLOSE_POSITI
 import static org.firstinspires.ftc.teamcode.Constants.CLAW_GRABBER_OPEN_POSITION;
 import static org.firstinspires.ftc.teamcode.Constants.CLAW_ROTATOR_COLLECTING_POSITION;
 import static org.firstinspires.ftc.teamcode.Constants.CLAW_ROTATOR_SCORING_POSITION;
-import static org.firstinspires.ftc.teamcode.Constants.SPEED;
+import static org.firstinspires.ftc.teamcode.Constants.CONTROLLER_ELEMENT_STATE;
+import static org.firstinspires.ftc.teamcode.Constants.CONTROLLER_ELEMENT_STATE.HELD;
+import static org.firstinspires.ftc.teamcode.Constants.CONTROLLER_ELEMENT_STATE.PRESSED;
+import static org.firstinspires.ftc.teamcode.Constants.HOLONOMIC_SPEED;
+import static org.firstinspires.ftc.teamcode.Constants.TELEOP_STATE;
 import static org.firstinspires.ftc.teamcode.Constants.TELEOP_STATE.AUTO;
 import static org.firstinspires.ftc.teamcode.Constants.TELEOP_STATE.MANUAL;
 import static org.firstinspires.ftc.teamcode.Constants.TURNING_POWER_SCALAR;
@@ -37,7 +45,7 @@ public abstract class TeleopBase extends OpMode {
     private Gamepad g1;
     private Gamepad g2;
 
-    private Constants.TELEOP_STATE state;
+    private TELEOP_STATE state;
 
     // Motors
     private DcMotor leftFront;
@@ -49,12 +57,16 @@ public abstract class TeleopBase extends OpMode {
     private Servo clawRotator;
     private Servo clawGrabber;
 
+    private double clawRotatorPosition;
+    private double clawGrabberPosition;
+
     // Gyro sensor
     private BNO055IMU imu;
 
     private Orientation angles;
     private double angleOffset;
     private double currentRobotAngle;
+    private double targetAngle;
 
     // Toggle booleans
     private boolean clawGrabberOpen;
@@ -66,7 +78,7 @@ public abstract class TeleopBase extends OpMode {
 
         g1 = new Gamepad(gamepad1);
         g2 = new Gamepad(gamepad2);
-        state = AUTO;
+        state = MANUAL;
 
         allianceColor = getAllianceColor();
 
@@ -78,23 +90,18 @@ public abstract class TeleopBase extends OpMode {
         rightBack = hardwareMap.get(DcMotor.class, "rightBack");
         armRotator = hardwareMap.get(DcMotor.class, "armRotator");
         armRaiser = hardwareMap.get(DcMotor.class, "armRaiser");
+
         clawRotator = hardwareMap.get(Servo.class, "clawRotator");
+        clawRotator.setPosition(CLAW_ROTATOR_COLLECTING_POSITION);
         clawGrabber = hardwareMap.get(Servo.class, "clawGrabber");
-
-
+        clawGrabber.setPosition(CLAW_GRABBER_CLOSE_POSITION);
 
         armRotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armRotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         armRotator.setTargetPosition(0);
-        armRotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armRotator.setPower(ARM_CORRECTIVE_POWER);
-        armRotator.setDirection(DcMotorSimple.Direction.REVERSE);
         armRaiser.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armRaiser.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         armRaiser.setTargetPosition(0);
-        armRaiser.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        armRaiser.setPower(ARM_CORRECTIVE_POWER);
-        armRaiser.setDirection(DcMotorSimple.Direction.REVERSE);
 
         clawGrabberOpen = false;
         clawRotatorScoring = false;
@@ -116,8 +123,9 @@ public abstract class TeleopBase extends OpMode {
         currentRobotAngle = 0.0;
         angleOffset = allianceColor.angleOffset;
 
-
+        configureState();
     }
+
 
     public void start() {
         resetRuntime();
@@ -125,72 +133,91 @@ public abstract class TeleopBase extends OpMode {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void loop() {
-
         telemetry.addData("MANUAL/AUTO: ", state);
+        telemetry.addData("g2x", g2.x.getState());
+        telemetry.addData("g2_left_stick_y", g2.left_stick_y.component);
+        telemetry.addData("g2_left_stick_x", g2.left_stick_x.component);
+        telemetry.addData("clawRotatorScoring", clawRotatorScoring);
+        telemetry.addData("armRotator.position", armRotator.getCurrentPosition());
+        telemetry.addData("armRaiser.position", armRaiser.getCurrentPosition());
+        telemetry.addData("clawGrabber.position", clawGrabber.getPosition());
+        telemetry.addData("clawRotator.position", clawRotator.getPosition());
 
+        // Update the custom gamepad objects.
         g1.update();
         g2.update();
 
+        // Update the internal IMU orientation variables to eliminate extra calls to the IMU in loop.
         getAngle();
 
+        // Zero the gyro.
         switch (g1.b.getState()) {
             case PRESSED:
                 recalibrateGyro();
                 break;
         }
 
+        // Update all driving information.
         holonomicDrive();
 
-        telemetry.addData("g2x", g2.x.getState());
-
+        // Switch the active mode. Disabled in TEST mode.
         switch (g2.x.getState()) {
             case PRESSED:
                 switch (state) {
-                    case MANUAL:
+                    case MANUAL:  // Switch to Auto
                         state = AUTO;
-                        armRotator.setPower(ARM_CORRECTIVE_POWER);
-                        armRaiser.setPower(ARM_CORRECTIVE_POWER);
-                        armRotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        armRaiser.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                         break;
-                    case AUTO:
+                    case AUTO:  // Switch to Manual
                         state = MANUAL;
-                        armRotator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                        armRaiser.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                        break;
+
+                    /*case MANUAL:
+                        break;*/
+                    case TEST:
                         break;
                 }
+                configureState();
         }
 
-        switch (state){
+        // Run the loop method for the current mode.
+        switch (state) {
             case MANUAL:
                 manualLoop();
                 break;
             case AUTO:
                 autoLoop();
                 break;
-
-        }
-
-        switch(g2.y.getState())  {
-            case PRESSED:
-                clawGrabber();
-                break;
-        }
-
-        switch (g2.b.getState()) {
-            case PRESSED:
-                clawRotate();
+            case TEST:
+                testLoop();
                 break;
         }
     }
 
     private void manualLoop() {
+        // Actuate the arm raiser.
         switch (g2.left_stick_y.getState()) {
             case PRESSED:
                 armRaiser.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 break;
             case HELD:
-                armRaiser.setPower(g2.left_stick_y.component);
+                if (g2.right_stick_button.getState() != HELD) {   // If the right stick button is held, let the arm go past the limit.
+                    if ((g2.left_stick_y.component > 0 && armRaiser.getCurrentPosition() < ARM_RAISER_MAX_POSITION) ||  // If the arm is trying to go up and can do so, or
+                            (g2.left_stick_y.component < 0 && armRaiser.getCurrentPosition() > ARM_RAISER_MIN_POSITION)) { // if the arm is trying to go down and can do so.
+                        armRaiser.setPower(g2.left_stick_y.component);
+
+                    } else {
+                        armRaiser.setPower(0.0);
+                    }
+
+                    /*telemetry.addData("Can move", (g2.left_stick_y.component > 0 && armRaiser.getCurrentPosition() < ARM_RAISER_MAX_POSITION) ||
+                            (g2.left_stick_y.component < 0 && armRaiser.getCurrentPosition() > ARM_RAISER_MIN_POSITION));
+                    telemetry.addData("Can lower", (g2.left_stick_y.component < 0 && armRaiser.getCurrentPosition() > ARM_RAISER_MIN_POSITION));
+                    telemetry.addData("Can raise", (g2.left_stick_y.component > 0 && armRaiser.getCurrentPosition() < ARM_RAISER_MAX_POSITION));
+                    telemetry.addData("armRaiser.position", armRaiser.getCurrentPosition());*/
+                }
+
+                else armRaiser.setPower(g2.left_stick_y.component);  // Lets the arm move without limits if the right stick is pressed.
+
                 break;
             case RELEASED:
                 armRaiser.setTargetPosition(armRaiser.getCurrentPosition());
@@ -199,12 +226,13 @@ public abstract class TeleopBase extends OpMode {
                 break;
         }
 
-        switch (g2.right_stick_x.getState()) {
+        // Rotate the arm.
+        switch (g2.right_stick_y.getState()) {
             case PRESSED:
                 armRotator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 break;
             case HELD:
-                armRotator.setPower(g2.right_stick_x.component);
+                armRotator.setPower(g2.right_stick_y.component * -ARM_POWER);
                 break;
             case RELEASED:
                 armRotator.setTargetPosition(armRotator.getCurrentPosition());
@@ -212,18 +240,77 @@ public abstract class TeleopBase extends OpMode {
                 armRotator.setPower(ARM_CORRECTIVE_POWER);
                 break;
         }
+
+        // Actuate the claw grabber.
+        switch(g2.y.getState()) {
+            case PRESSED:
+                clawGrabber();
+                break;
+        }
+
+        // Rotate the claw
+        switch (g2.b.getState()) {
+            case PRESSED:
+                clawRotate();
+                break;
+        }
+
+        // Reset the arm raiser position.
+        if (g2.dpad_up.getState() == CONTROLLER_ELEMENT_STATE.RELEASED && g2.right_bumper.getState() == PRESSED) {
+            DcMotor.RunMode mode = armRaiser.getMode();
+            armRaiser.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            armRaiser.setTargetPosition(0);
+            armRaiser.setMode(mode);
+        }
     }
 
+    /**
+     * Loop with more automation, such as
+     */
     private void autoLoop() {
+        telemetry.addData("motormode", armRaiser.getMode());
+        telemetry.addData("armRaiserTargetPos", armRaiser.getTargetPosition());
+
+        // Rotate the arm, raise the arm, and rotate the claw
         switch (g2.b.getState()) {
             case PRESSED:
                 armRotate();
                 armRaise();
+                clawRotate();
                 break;
         }
-        telemetry.addData("motormode", armRaiser.getMode());
-        telemetry.addData("armRaiserpos", armRaiser.getTargetPosition());
+
+        // Actuate the claw grabber.
+        switch (g2.y.getState()) {
+            case PRESSED:
+                clawGrabber();
+                break;
+        }
     }
+
+    /**
+     * Alternative loop for testing.
+     */
+    private void testLoop() {
+        // Manually rotate the claw.
+        switch (g2.right_stick_x.getState()) {
+            case PRESSED:
+            case HELD:
+                clawRotatorPosition += g2.right_stick_x.component / 100;
+                break;
+        }
+        clawRotator.setPosition(clawRotatorPosition);
+
+        // Manually actuate the claw grabber.
+        switch (g2.left_stick_x.getState()) {
+            case PRESSED:
+            case HELD:
+                clawGrabberPosition += g2.left_stick_x.component / 100;
+                break;
+        }
+        clawGrabber.setPosition(clawGrabberPosition);
+    }
+
     /**
      * Gets the angle of the robot from the rev imu and subtracts the angle offset.
      */
@@ -272,7 +359,7 @@ public abstract class TeleopBase extends OpMode {
             double holonomicAngle = gamepad1LeftStickAngle + currentRobotAngle + Math.PI / 4;
 
             // overall power based on how far the stick is from the center
-            double power = Math.sqrt(Math.pow(gamepad1LeftStickX, 2) + Math.pow(gamepad1LeftStickY, 2)) * SPEED;
+            double power = Math.sqrt(Math.pow(gamepad1LeftStickX, 2) + Math.pow(gamepad1LeftStickY, 2)) * HOLONOMIC_SPEED;
 
             // the main diagonal is the diagonal from top left to bottom right
             double mainDiagonalPercent = Math.cos(holonomicAngle);
@@ -320,9 +407,11 @@ public abstract class TeleopBase extends OpMode {
     private void armRaise() {
         if (armRaiserScoring) {
             armRaiserScoring = false;
+            armRaiser.setPower(ARM_RAISER_RAISE_SPEED);
             armRaiser.setTargetPosition(ARM_RAISER_SCORING_POSITION);
         } else {
             armRaiserScoring = true;
+            armRaiser.setPower(ARM_RAISER_LOWER_SPEED);
             armRaiser.setTargetPosition(ARM_RAISER_COLLECTING_POSITION);
         }
     }
@@ -361,6 +450,30 @@ public abstract class TeleopBase extends OpMode {
         } else {
             clawGrabberOpen = true;
             clawGrabber.setPosition((CLAW_GRABBER_OPEN_POSITION));
+        }
+    }
+
+    private void configureState() {
+        switch (state) {
+            case AUTO:  // Switch to Auto
+                armRotator.setPower(ARM_CORRECTIVE_POWER);
+                armRaiser.setPower(ARM_CORRECTIVE_POWER);
+                armRotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                armRaiser.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                break;
+            case MANUAL:  // Switch to Manual
+                armRotator.setPower(0.0);
+                armRaiser.setPower(0.0);
+                armRotator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                armRaiser.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                break;
+
+                    /*case MANUAL:
+                        break;*/
+            case TEST:
+                clawRotatorPosition = 0.5;
+                clawGrabberPosition = 0.5;
+                break;
         }
     }
 

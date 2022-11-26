@@ -30,6 +30,7 @@ public abstract class Subsystem {
 
     protected Subsystem(@NonNull ResourceManager resourceManager, String name) {
         this.telemetry = resourceManager.telemetry;
+        this.name = name;
         allianceColor = resourceManager.allianceColor;
     }
 
