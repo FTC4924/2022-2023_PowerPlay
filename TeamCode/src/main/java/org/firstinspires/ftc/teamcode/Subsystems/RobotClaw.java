@@ -14,7 +14,7 @@ public class RobotClaw extends Subsystem {
     public RobotClaw(@NonNull ResourceManager resourceManager, String name) {
         super(resourceManager, name);
 
-        clawGripper = resourceManager.removeDevice(Servo.class, "clawGripper");
+        clawGripper = resourceManager.removeDevice(Servo.class, "clawGrabber");
         clawRotator = resourceManager.removeDevice(Servo.class, "clawRotator");
 
         clawGripper.setPosition(Constants.CLAW_GRABBER_CLOSE_POSITION);
@@ -29,11 +29,11 @@ public class RobotClaw extends Subsystem {
         return clawRotator.getPosition();
     }
 
-    public void setGripperPos(int pos) {
+    public void setGripperPos(double pos) {
         clawGripper.setPosition(pos);
     }
 
-    public void setRotatorPos(int pos) {
+    public void setRotatorPos(double pos) {
         clawRotator.setPosition(pos);
     }
 }

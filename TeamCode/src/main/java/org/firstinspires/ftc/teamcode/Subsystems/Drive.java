@@ -84,6 +84,10 @@ public class Drive extends Subsystem {
     public void gyroCorrection() {
         fetchAngleError();
 
+        telemetry.addData("Angle Error", headingError);
+        telemetry.addData("Current Robot Angle", currentHeading);
+        telemetry.addData("Target Robot Angle", targetHeading);
+
         setTargetPositions(
                 leftFront.getTargetPosition() + headingError * TURNING_ENCODER_POSITION_SCALAR,
                 rightFront.getTargetPosition() + headingError * TURNING_ENCODER_POSITION_SCALAR,

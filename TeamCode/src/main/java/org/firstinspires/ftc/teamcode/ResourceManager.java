@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -46,10 +47,10 @@ public class ResourceManager {
         telemetry.addData("Starting iteration", "");
         Log.i("TeamCode", "ResourceManager: Starting Iteration");*/
         for (HardwareDevice device : hardwareMap) {
-            String names = hardwareMap.getNamesOf(device).iterator().next();
-            if (!IGNORE_DEVICES.contains(names)) {
-                idleDevices.put(names, device);
-                telemetry.addData("Added Device", names + " : " + device.getDeviceName() + " ;; " + hardwareMap.getNamesOf(device).size());
+            String name = hardwareMap.getNamesOf(device).iterator().next();
+            if (!IGNORE_DEVICES.contains(name)) {
+                idleDevices.put(name, device);
+                telemetry.addData("Added Device", name + " : " + device.getDeviceName() + " ;; " + hardwareMap.getNamesOf(device).size());
             }
         }
 
@@ -68,7 +69,7 @@ public class ResourceManager {
     public <T extends Subsystem> T removeSubsystem(@NonNull Class<T> classType, String name) {
         name = name.trim();
         Subsystem subsystem = idleSubsystems.remove(name);
-        activeSubsystems.put(name, subsystem);
+        if (subsystem != null) activeSubsystems.put(name, subsystem);
         return classType.cast(subsystem);
     }
 
@@ -80,6 +81,7 @@ public class ResourceManager {
     public void addSubsystems(@NonNull Subsystem... subsystems) {
         for (Subsystem subsystem : subsystems) {
             idleSubsystems.put(subsystem.getName(), subsystem);
+            activeSubsystems.remove(subsystem.getName());
         }
     }
 
@@ -93,7 +95,7 @@ public class ResourceManager {
     public <T extends HardwareDevice> T removeDevice(@NonNull Class<T> classType, String name) {
         name = name.trim();
         HardwareDevice device = idleDevices.remove(name);
-        activeDevices.put(name, device);
+        if (device != null) activeDevices.put(name, device);
         return classType.cast(device);
     }
 
@@ -104,9 +106,10 @@ public class ResourceManager {
      */
     public void addDevices(@NonNull HardwareDevice... devices) {
         for(HardwareDevice device : devices) {
-            Iterator<String> names = hardwareMap.getNamesOf(device).iterator();
-            if (IGNORE_DEVICES.contains(names.next())) {
-                idleDevices.put(names.next(), device);
+            String name = hardwareMap.getNamesOf(device).iterator().next();
+            if (!IGNORE_DEVICES.contains(name)) {
+                idleDevices.put(name, device);
+                activeDevices.remove(name);
             }
         }
     }

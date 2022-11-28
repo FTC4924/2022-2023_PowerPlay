@@ -37,6 +37,28 @@ public class Constants {
         }
     }
 
+    public enum ClawRotatorPos {
+        CLAW_COLLECT(0.8267),
+        CLAW_SCORE(0.1406);
+
+        public final double pos;
+
+        private ClawRotatorPos(double pos) {
+            this.pos = pos;
+        }
+    }
+
+    public enum ClawGrabberPos {
+        CLAW_CLOSE(0.0781),
+        CLAW_OPEN(0.6640);
+
+        public final double pos;
+
+        private ClawGrabberPos(double pos) {
+            this.pos = pos;
+        }
+    }
+
     /**
      * Number of motor encoder ticks per foot.
      */
@@ -60,7 +82,7 @@ public class Constants {
     public static final double TURNING_ENCODER_POSITION_SCALAR = 20.0;
     public static final double TURNING_POWER_SCALAR = 0.5;
 
-    public static final double HOLONOMIC_SPEED = 0.5;
+    public static final double HOLONOMIC_SPEED = 0.75;
 
     /*
     All the constants below are part of image processing.

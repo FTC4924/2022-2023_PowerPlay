@@ -5,7 +5,7 @@ import android.os.Build;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.Commands.Command;
-import org.firstinspires.ftc.teamcode.Subsystems.Drive;
+import org.firstinspires.ftc.teamcode.Subsystems.*;
 
 import androidx.annotation.RequiresApi;
 
@@ -50,8 +50,9 @@ public abstract class AutoBase extends OpMode {
 
         resourceManager.addSubsystems(
                 //new Camera(resourceManager, "Webcam 1", hardwareMap)/*,
-                new Drive(resourceManager, "drive", hardwareMap)/*,
-                //new LedMatrix(resourceManager, "display")*/
+                new Drive(resourceManager, "drive", hardwareMap),
+                new RobotClaw(resourceManager, "robotClaw"),
+                new RobotArm(resourceManager, "robotArm")
         );
 
         command = getCommand();
