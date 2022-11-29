@@ -84,6 +84,12 @@ public class Drive extends Subsystem {
     public void gyroCorrection() {
         fetchAngleError();
 
+        /*int encoderError = (int) Math.round(ROBOT_CHASSIS_RADIUS * headingError);
+        int leftFrontCorrectionPos = leftFront.getCurrentPosition() + encoderError;
+        int rightFrontCorrectionPos = rightFront.getCurrentPosition() + encoderError;
+        int leftBackCorrectionPos = leftBack.getCurrentPosition() + encoderError;
+        int rightBackCorrectionPos = rightBack.getCurrentPosition() + encoderError;*/
+
         setTargetPositions(
                 leftFront.getTargetPosition() + headingError * TURNING_ENCODER_POSITION_SCALAR,
                 rightFront.getTargetPosition() + headingError * TURNING_ENCODER_POSITION_SCALAR,

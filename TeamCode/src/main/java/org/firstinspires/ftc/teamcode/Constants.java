@@ -40,7 +40,7 @@ public class Constants {
     /**
      * Number of motor encoder ticks per foot.
      */
-    public static final double TICKS_PER_FOOT = 543.45;
+    public static final double TICKS_PER_FOOT = 434.76;
 
     /**
      * Defines the dead zone for controller input.
@@ -57,8 +57,9 @@ public class Constants {
      */
     public static final double ENCODER_POSITION_TOLERANCE = 100.0;
 
-    public static final double TURNING_ENCODER_POSITION_SCALAR = 20.0;
-    public static final double TURNING_POWER_SCALAR = 0.5;
+    public static final double TURNING_ENCODER_POSITION_SCALAR = 5.0;
+    public static final double TURNING_POWER_SCALAR = 0.75;
+    public static final double CHASSIS_RADIUS = 0.77;
 
     public static final double HOLONOMIC_SPEED = 0.5;
 
