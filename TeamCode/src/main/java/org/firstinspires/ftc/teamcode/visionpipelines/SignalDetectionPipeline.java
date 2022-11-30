@@ -16,11 +16,11 @@ import static org.firstinspires.ftc.teamcode.Constants.YELLOW;
 public class SignalDetectionPipeline extends OpenCvPipeline
 {
 
-    public int redMean;
-    public int greenMean;
-    public int blueMean;
+    private int redMean;
+    private int greenMean;
+    private int blueMean;
 
-    private volatile SignalSide signalSide = null;
+    private volatile SignalSide signalSide = SignalSide.SIDE_R;
 
     void inputToCb(Mat input) {
         Scalar means = Core.mean(input.submat(ROI));
@@ -31,19 +31,21 @@ public class SignalDetectionPipeline extends OpenCvPipeline
 
     private void maxAverage() {
         int max = redMean;
-        signalSide = SignalSide.SIDE_P;
-        if (greenMean > max) {
-            max = greenMean;
-            signalSide = SignalSide.SIDE_R;
-        }
+        signalSide = SignalSide.SIDE_R;
         if (blueMean > max) {
+            max = blueMean;
             signalSide = SignalSide.SIDE_B;
+        }
+        if (greenMean > max) {
+            signalSide = SignalSide.SIDE_P;
         }
     }
 
     @Override
     public void init(Mat firstFrame) {
         inputToCb(firstFrame);
+
+        maxAverage();
     }
 
     @Override

@@ -7,13 +7,20 @@ import org.firstinspires.ftc.teamcode.AutoBase;
 import org.firstinspires.ftc.teamcode.Commands.Command;
 import org.firstinspires.ftc.teamcode.Commands.Pause;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 @Autonomous(name="AutoPause")
 public class AutoPause extends AutoBase {
     protected AllianceColor getAllianceColor()  {
         return AllianceColor.BLUE;
     }
-
-    protected Command getCommand() {
-        return new Pause(100);
+    protected boolean exitOnLastCommand = true;
+    protected ArrayList<Command> getCommands() {
+        return new ArrayList<Command>(
+                Collections.singletonList(
+                        new Pause(200)
+                )
+        );
     }
 }

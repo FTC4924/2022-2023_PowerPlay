@@ -7,9 +7,15 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.teamcode.visionpipelines.SignalDetectionPipeline;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.openftc.easyopencv.OpenCvWebcam;
 
 import androidx.annotation.RequiresApi;
 
@@ -33,6 +39,8 @@ import static org.firstinspires.ftc.teamcode.Constants.CONTROLLER_ELEMENT_STATE;
 import static org.firstinspires.ftc.teamcode.Constants.CONTROLLER_ELEMENT_STATE.HELD;
 import static org.firstinspires.ftc.teamcode.Constants.CONTROLLER_ELEMENT_STATE.PRESSED;
 import static org.firstinspires.ftc.teamcode.Constants.HOLONOMIC_SPEED;
+import static org.firstinspires.ftc.teamcode.Constants.RESOLUTION_HEIGHT;
+import static org.firstinspires.ftc.teamcode.Constants.RESOLUTION_WIDTH;
 import static org.firstinspires.ftc.teamcode.Constants.TELEOP_STATE;
 import static org.firstinspires.ftc.teamcode.Constants.TELEOP_STATE.AUTO;
 import static org.firstinspires.ftc.teamcode.Constants.TELEOP_STATE.MANUAL;
@@ -41,6 +49,9 @@ import static org.firstinspires.ftc.teamcode.Constants.TURNING_POWER_SCALAR;
 public abstract class TeleopBase extends OpMode {
 
     protected static AllianceColor allianceColor;
+
+    private OpenCvWebcam webcam;
+    private int x1, x2, y1, y2;
 
     private Gamepad g1;
     private Gamepad g2;
@@ -126,6 +137,30 @@ public abstract class TeleopBase extends OpMode {
         configureState();
     }
 
+    /*@Override
+    public void init_loop() {
+        g2.update();
+
+        if (g2.left_stick_x.getState() == HELD) {
+            x1 += (int) (g2.left_stick_x.component);
+        }
+        if (g2.left_stick_y.getState() == HELD) {
+            y1 += (int) (g2.left_stick_y.component);
+        }
+        if (g2.right_stick_x.getState() == HELD) {
+            x2 += (int) (g2.right_stick_x.component);
+        }
+        if (g2.right_stick_y.getState() == HELD) {
+            y2 += (int) (g2.right_stick_y.component);
+        }
+
+        SignalDetectionPipeline.ROI = new Rect(new Point(x1,y1), new Point(x2,y2));
+
+        telemetry.addData("ROI x1", x1);
+        telemetry.addData("ROI y1", y1);
+        telemetry.addData("ROI x2", x2);
+        telemetry.addData("ROI y2", y2);
+    }*/
 
     public void start() {
         resetRuntime();
@@ -471,8 +506,23 @@ public abstract class TeleopBase extends OpMode {
                     /*case MANUAL:
                         break;*/
             case TEST:
-                clawRotatorPosition = 0.5;
-                clawGrabberPosition = 0.5;
+                int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+                webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+          
+                webcam.setPipeline(new SignalDetectionPipeline());
+                webcam.setMillisecondsPermissionTimeout(2500);
+                webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+                    @Override
+                    public void onOpened() {
+                        webcam.startStreaming(RESOLUTION_WIDTH, RESOLUTION_HEIGHT, OpenCvCameraRotation.UPRIGHT);
+                        telemetry.addData("Webcam", "Setup Finished");
+                    }
+
+                    public void onError(int errorCode) {
+                        telemetry.speak("The web cam wasn't initialised correctly! Error code: " + errorCode);
+                        telemetry.addData("Webcam", "Setup Failed! Error code: " + errorCode);
+                    }
+                });
                 break;
         }
     }

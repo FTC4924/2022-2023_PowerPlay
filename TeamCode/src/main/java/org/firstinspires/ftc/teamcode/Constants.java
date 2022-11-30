@@ -26,9 +26,9 @@ public class Constants {
     }
 
     public enum SignalSide {
-        SIDE_R(GREEN),
+        SIDE_R(RED),
         SIDE_B(BLUE),
-        SIDE_P(RED);
+        SIDE_P(GREEN);
 
         public final Scalar color;
 
@@ -59,6 +59,9 @@ public class Constants {
         }
     }
 
+    @FloatRange(from=0.0, to=1.0)
+    protected static final double ANGLE_ERROR_TOLERANCE = 0.05;
+
     /**
      * Number of motor encoder ticks per foot.
      */
@@ -77,10 +80,10 @@ public class Constants {
     /**
      * How close the encoder needs to get to the target position for autonomous to move to the next command.
      */
-    public static final double ENCODER_POSITION_TOLERANCE = 100.0;
+    public static final double ENCODER_POSITION_TOLERANCE = 20.0;
 
-    public static final double TURNING_ENCODER_POSITION_SCALAR = 5.0;
-    public static final double TURNING_POWER_SCALAR = 0.75;
+    public static final double TURNING_ENCODER_POSITION_SCALAR = 10.0;
+    public static final double TURNING_POWER_SCALAR = 0.5;
     public static final double CHASSIS_RADIUS = 0.77;
 
     public static final double HOLONOMIC_SPEED = 0.75;
@@ -92,7 +95,7 @@ public class Constants {
     public static final Scalar GREEN = new Scalar(0, 255, 0);
     public static final Scalar BLUE = new Scalar(0, 0, 255);
     public static final Scalar YELLOW = new Scalar(255, 255, 0);
-    public static final Rect ROI = new Rect(new Point(0,665), new Point(960,840));
+    public static final Rect ROI = new Rect(new Point(550,500), new Point(800,650));
     public static final int RED_CHANNEL = 0;
     public static final int GREEN_CHANNEL = 1;
     public static final int BLUE_CHANNEL = 2;
