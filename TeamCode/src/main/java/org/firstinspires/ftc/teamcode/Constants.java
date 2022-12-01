@@ -83,7 +83,7 @@ public class Constants {
     public static final double ENCODER_POSITION_TOLERANCE = 20.0;
 
     public static final double TURNING_ENCODER_POSITION_SCALAR = 10.0;
-    public static final double TURNING_POWER_SCALAR = 0.5;
+    public static final double TURNING_POWER_SCALAR = 0.35;
     public static final double CHASSIS_RADIUS = 0.77;
 
     public static final double HOLONOMIC_SPEED = 0.75;
@@ -108,11 +108,11 @@ public class Constants {
     public static final double CLAW_ROTATOR_SCORING_POSITION = 0.1406;
     public static final double CLAW_ROTATOR_COLLECTING_POSITION = 0.8267;
     public static final double ARM_POWER = 0.75;
-    public static final int ARM_ROTATOR_SCORING_POSITION = 1640;
-    public static final int ARM_ROTATOR_COLLECTING_POSITION = -3142;
-    public static final int ARM_RAISER_SCORING_POSITION = 1900;
+    public static final int ARM_ROTATOR_SCORING_POSITION = 2250;
+    public static final int ARM_ROTATOR_COLLECTING_POSITION = -2250;
+    public static final int ARM_RAISER_SCORING_POSITION = 2350;
     public static final int ARM_RAISER_COLLECTING_POSITION = 20;
-    public static final int ARM_RAISER_MAX_POSITION = 2250;
+    public static final int ARM_RAISER_MAX_POSITION = 2400;
     public static final int ARM_RAISER_MIN_POSITION = -20;
     public static final double ARM_RAISER_RAISE_SPEED = 0.5;
     public static final double ARM_RAISER_LOWER_SPEED = 0.25;

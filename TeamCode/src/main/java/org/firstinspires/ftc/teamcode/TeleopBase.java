@@ -5,6 +5,7 @@ import android.os.Build;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -110,6 +111,7 @@ public abstract class TeleopBase extends OpMode {
         armRotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armRotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         armRotator.setTargetPosition(0);
+        armRotator.setDirection(DcMotorSimple.Direction.REVERSE);
         armRaiser.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armRaiser.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         armRaiser.setTargetPosition(0);
@@ -267,7 +269,7 @@ public abstract class TeleopBase extends OpMode {
                 armRotator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 break;
             case HELD:
-                armRotator.setPower(g2.right_stick_y.component * -ARM_POWER);
+                armRotator.setPower(g2.right_stick_y.component * ARM_POWER);
                 break;
             case RELEASED:
                 armRotator.setTargetPosition(armRotator.getCurrentPosition());

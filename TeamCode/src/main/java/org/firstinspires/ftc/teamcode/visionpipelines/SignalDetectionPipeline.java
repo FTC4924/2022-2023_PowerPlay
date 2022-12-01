@@ -19,14 +19,21 @@ public class SignalDetectionPipeline extends OpenCvPipeline
     private int redMean;
     private int greenMean;
     private int blueMean;
+    private int loops;
 
     private volatile SignalSide signalSide = SignalSide.SIDE_R;
 
     void inputToCb(Mat input) {
         Scalar means = Core.mean(input.submat(ROI));
-        redMean = (int) means.val[RED_CHANNEL];
-        greenMean = (int) means.val[GREEN_CHANNEL];
-        blueMean = (int) means.val[BLUE_CHANNEL];
+        redMean += (int) means.val[RED_CHANNEL];
+        greenMean += (int) means.val[GREEN_CHANNEL];
+        blueMean += (int) means.val[BLUE_CHANNEL];
+
+        loops++;
+
+        redMean /= loops;
+        greenMean /= loops;
+        blueMean /= loops;
     }
 
     private void maxAverage() {
@@ -63,6 +70,13 @@ public class SignalDetectionPipeline extends OpenCvPipeline
         }
 
         return input;
+    }
+
+    public void clearSignalSide() {
+        redMean = 0;
+        greenMean = 0;
+        blueMean = 0;
+        loops = 0;
     }
 
     public SignalSide getSignalSide()
