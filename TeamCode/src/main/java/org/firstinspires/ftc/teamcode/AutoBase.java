@@ -46,6 +46,7 @@ public abstract class AutoBase extends OpMode {
     private ArrayList<ArrayList<Command>> upstreamCommands;
     private Command currentCommand;
     private boolean commandFirstLoop;
+    private int commandLoops;
 
     private DcMotor leftFront;
     private DcMotor leftBack;
@@ -90,8 +91,6 @@ public abstract class AutoBase extends OpMode {
     private boolean bristlesOut;
 
     protected boolean exitOnLastCommand = true;
-
-
 
     public void init() {
 
@@ -193,6 +192,8 @@ public abstract class AutoBase extends OpMode {
     }
 
     public void loop() {
+        commandLoops++;
+
         telemetry.addData("Current Command", currentCommand.getClass().getSimpleName());
         telemetry.addData("Signal Side", signalSide);
         telemetry.addData("Arm Rotator Pos", arm.getCurrentPosition());
@@ -319,8 +320,11 @@ public abstract class AutoBase extends OpMode {
     private void pause() { if(time > currentCommand.duration) nextCommand(); }
 
     private void detectSignalSide() {
-        signalSide = cameraPipeline.getSignalSide();
-        nextCommand();
+        if (commandFirstLoop) cameraPipeline.clearSignalSide();
+        if (commandLoops > 20) {
+            signalSide = cameraPipeline.getSignalSide();
+            nextCommand();
+        }
     }
 
     private void loadSignalCommands() {
@@ -432,6 +436,7 @@ public abstract class AutoBase extends OpMode {
             if(!currentCommands.isEmpty())
                 upstreamCommands.add(0, currentCommands);
             currentCommands = newCommands;
+            commandLoops = 0;
         }
     }
 

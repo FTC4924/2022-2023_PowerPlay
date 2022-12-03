@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.AutoTest;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.AllianceColor;
 import org.firstinspires.ftc.teamcode.AutoBase;
@@ -16,6 +17,7 @@ import java.util.Arrays;
 
 import static org.firstinspires.ftc.teamcode.Constants.CHASSIS_RADIUS;
 
+@Disabled
 @Autonomous(name="AutoTest")
 public class AutoTest extends AutoBase {
     protected AllianceColor getAllianceColor()  {

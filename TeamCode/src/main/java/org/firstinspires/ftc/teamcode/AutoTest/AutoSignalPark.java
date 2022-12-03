@@ -16,8 +16,8 @@ import java.util.Collections;
 
 import static org.firstinspires.ftc.teamcode.Constants.CHASSIS_RADIUS;
 
-@Autonomous(name="AutoVisionMove")
-public class AutoVisionMove extends AutoBase {
+@Autonomous(name="AutoSignalPark")
+public class AutoSignalPark extends AutoBase {
     protected AllianceColor getAllianceColor() {
         return AllianceColor.BLUE;
     }
@@ -32,7 +32,7 @@ public class AutoVisionMove extends AutoBase {
                         new LoadSignalSide(
                                 new ArrayList<>(
                                         Collections.singletonList(
-                                                new Move(1.9, 90, 0.4)
+                                                new Move(2.1, 90, 0.4)
                                         )
                                 ),
                                 new ArrayList<>(
