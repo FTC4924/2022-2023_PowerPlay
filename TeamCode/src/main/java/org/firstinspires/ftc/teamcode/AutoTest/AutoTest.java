@@ -5,12 +5,12 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.AllianceColor;
 import org.firstinspires.ftc.teamcode.AutoBase;
-import org.firstinspires.ftc.teamcode.Commands.ArmRotate;
-import org.firstinspires.ftc.teamcode.Commands.Command;
-import org.firstinspires.ftc.teamcode.Commands.GripperGrab;
-import org.firstinspires.ftc.teamcode.Commands.LiftRaise;
-import org.firstinspires.ftc.teamcode.Commands.Move;
-import org.firstinspires.ftc.teamcode.Commands.Turn;
+import org.firstinspires.ftc.teamcode.Commands.preftclib.ArmRotate;
+import org.firstinspires.ftc.teamcode.Commands.preftclib.Command;
+import org.firstinspires.ftc.teamcode.Commands.preftclib.GripperGrab;
+import org.firstinspires.ftc.teamcode.Commands.preftclib.LiftRaise;
+import org.firstinspires.ftc.teamcode.Commands.preftclib.Move;
+import org.firstinspires.ftc.teamcode.Commands.preftclib.Turn;
 
 import java.util.ArrayList;
 import java.util.Arrays;

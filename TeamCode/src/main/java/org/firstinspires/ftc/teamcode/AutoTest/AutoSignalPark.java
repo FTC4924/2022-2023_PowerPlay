@@ -4,11 +4,11 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.AllianceColor;
 import org.firstinspires.ftc.teamcode.AutoBase;
-import org.firstinspires.ftc.teamcode.Commands.Command;
-import org.firstinspires.ftc.teamcode.Commands.DetectSignalSide;
-import org.firstinspires.ftc.teamcode.Commands.LoadSignalSide;
-import org.firstinspires.ftc.teamcode.Commands.Move;
-import org.firstinspires.ftc.teamcode.Commands.Pause;
+import org.firstinspires.ftc.teamcode.Commands.preftclib.Command;
+import org.firstinspires.ftc.teamcode.Commands.preftclib.DetectSignalSide;
+import org.firstinspires.ftc.teamcode.Commands.preftclib.LoadSignalSide;
+import org.firstinspires.ftc.teamcode.Commands.preftclib.Move;
+import org.firstinspires.ftc.teamcode.Commands.preftclib.Pause;
 
 import java.util.ArrayList;
 import java.util.Arrays;

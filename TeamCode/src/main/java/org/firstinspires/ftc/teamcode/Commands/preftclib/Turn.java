@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Commands;
+package org.firstinspires.ftc.teamcode.Commands.preftclib;
 
 /**
  * Command that changes the robot's auto correction system's target angle.

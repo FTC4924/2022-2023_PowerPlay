@@ -11,7 +11,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.teamcode.Commands.Command;
+import org.firstinspires.ftc.teamcode.Commands.preftclib.Command;
 import org.firstinspires.ftc.teamcode.visionpipelines.SignalDetectionPipeline;
 import org.opencv.core.Rect;
 import org.openftc.easyopencv.OpenCvCamera;
