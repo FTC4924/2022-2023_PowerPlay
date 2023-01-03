@@ -24,7 +24,7 @@ public class RepeatCommandGroup extends SequentialCommandGroup {
     public boolean isFinished() {
         if (super.isFinished()) {
             count++;
-            initialize();
+            if (count < repeat) initialize();
         }
         return count >= repeat;
     }

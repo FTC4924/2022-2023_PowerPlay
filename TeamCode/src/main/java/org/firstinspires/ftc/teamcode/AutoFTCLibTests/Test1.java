@@ -7,6 +7,7 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Commands.ftclib.Drive;
+import org.firstinspires.ftc.teamcode.Commands.ftclib.RRDrive;
 import org.firstinspires.ftc.teamcode.NewAutoBase;
 
 @Autonomous
@@ -18,7 +19,8 @@ public class Test1 extends NewAutoBase {
                     new Drive(drive, 0.25, 0, 0, 5.0),
                     new InstantCommand(gripper::close)
                 ),
-                new InstantCommand(gripper::open)
+                new InstantCommand(gripper::open),
+                new RRDrive(roadRunner, roadRunner.trajectorySequenceBuilder().forward(10).build())
         );
     }
 }
