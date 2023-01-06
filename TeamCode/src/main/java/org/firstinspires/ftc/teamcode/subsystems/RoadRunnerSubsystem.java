@@ -10,18 +10,20 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceBuilder;
 
 public class RoadRunnerSubsystem extends SubsystemBase {
-    private SampleMecanumDriveCancelable drive;
-    private Pose2d lastTrajectoryEndPose;
+    private final SampleMecanumDriveCancelable drive;
 
-    public RoadRunnerSubsystem(HardwareMap hardwareMap, Pose2d startPose) {
+    public RoadRunnerSubsystem(HardwareMap hardwareMap) {
         drive = new SampleMecanumDriveCancelable(hardwareMap);
-        lastTrajectoryEndPose = startPose;
     }
 
     @Override
     public void periodic() {
         drive.update();
         PoseStorage.pose2d = drive.getPoseEstimate();
+    }
+
+    public void breakFollowing() {
+        drive.breakFollowing();
     }
 
     public boolean isBusy() {
@@ -36,8 +38,8 @@ public class RoadRunnerSubsystem extends SubsystemBase {
         drive.turnAsync(angle);
     }
 
-    public TrajectorySequenceBuilder trajectorySequenceBuilder() {
-        return drive.trajectorySequenceBuilder(null);
+    public TrajectorySequenceBuilder trajectorySequenceBuilder(Pose2d startPos) {
+        return drive.trajectorySequenceBuilder(startPos);
     }
 
 }

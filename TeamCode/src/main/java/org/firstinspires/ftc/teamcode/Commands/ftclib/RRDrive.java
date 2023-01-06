@@ -7,8 +7,8 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 public class RRDrive extends CommandBase {
 
-    private TrajectorySequence trajectory;
-    private RoadRunnerSubsystem roadRunnerSubsystem;
+    private final TrajectorySequence trajectory;
+    private final RoadRunnerSubsystem roadRunnerSubsystem;
 
     public RRDrive(RoadRunnerSubsystem roadRunnerSubsystem, TrajectorySequence trajectory) {
         this.trajectory = trajectory;
@@ -25,5 +25,10 @@ public class RRDrive extends CommandBase {
     @Override
     public boolean isFinished() {
         return !roadRunnerSubsystem.isBusy();
+    }
+
+    @Override
+    public void end(boolean interrupted) {
+        if (interrupted) roadRunnerSubsystem.breakFollowing();
     }
 }

@@ -37,24 +37,46 @@ public class Constants {
         }
     }
 
-    public enum ClawRotatorPos {
-        CLAW_COLLECT(0.8267),
-        CLAW_SCORE(0.1406);
+    public enum WristState {
+        COLLECT(0.8253),
+        SCORE(0.1508);
 
         public final double pos;
 
-        private ClawRotatorPos(double pos) {
+        WristState(double pos) {
             this.pos = pos;
         }
     }
 
-    public enum ClawGrabberPos {
-        CLAW_CLOSE(0.0781),
-        CLAW_OPEN(0.6640);
+    public enum GripperState {
+        CLOSE(0.1588),
+        OPEN(0.5416);
 
         public final double pos;
 
-        private ClawGrabberPos(double pos) {
+        GripperState(double pos) {
+            this.pos = pos;
+        }
+    }
+
+    public enum ArmRaiserPos {
+        ARM_UP(2350),
+        ARM_DOWN(20);
+
+        public final int pos;
+
+        ArmRaiserPos(int pos) {
+            this.pos = pos;
+        }
+    }
+
+    public enum ArmRotatorPos {
+        ARM_SCORING(2250),
+        ARM_COLLECTING(-2250);
+
+        public final int pos;
+
+        ArmRotatorPos(int pos) {
             this.pos = pos;
         }
     }

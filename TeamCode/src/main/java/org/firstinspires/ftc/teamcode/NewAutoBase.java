@@ -24,7 +24,7 @@ public abstract class NewAutoBase extends CommandOpMode {
 
         gripper = new ClawSubsystem(hardwareMap, "gripper");
 
-        roadRunner = new RoadRunnerSubsystem(hardwareMap, null);
+        roadRunner = new RoadRunnerSubsystem(hardwareMap);
 
         schedule(new InstantCommand().andThen(getCommands()));
 

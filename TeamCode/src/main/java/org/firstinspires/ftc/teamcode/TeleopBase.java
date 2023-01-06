@@ -6,6 +6,7 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -24,21 +25,20 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.RADI
 import static org.firstinspires.ftc.teamcode.Constants.ANALOG_THRESHOLD;
 import static org.firstinspires.ftc.teamcode.Constants.ARM_CORRECTIVE_POWER;
 import static org.firstinspires.ftc.teamcode.Constants.ARM_POWER;
-import static org.firstinspires.ftc.teamcode.Constants.ARM_RAISER_COLLECTING_POSITION;
-import static org.firstinspires.ftc.teamcode.Constants.ARM_RAISER_LOWER_SPEED;
 import static org.firstinspires.ftc.teamcode.Constants.ARM_RAISER_MAX_POSITION;
 import static org.firstinspires.ftc.teamcode.Constants.ARM_RAISER_MIN_POSITION;
-import static org.firstinspires.ftc.teamcode.Constants.ARM_RAISER_RAISE_SPEED;
-import static org.firstinspires.ftc.teamcode.Constants.ARM_RAISER_SCORING_POSITION;
-import static org.firstinspires.ftc.teamcode.Constants.ARM_ROTATOR_COLLECTING_POSITION;
-import static org.firstinspires.ftc.teamcode.Constants.ARM_ROTATOR_SCORING_POSITION;
-import static org.firstinspires.ftc.teamcode.Constants.CLAW_GRABBER_CLOSE_POSITION;
-import static org.firstinspires.ftc.teamcode.Constants.CLAW_GRABBER_OPEN_POSITION;
-import static org.firstinspires.ftc.teamcode.Constants.CLAW_ROTATOR_COLLECTING_POSITION;
-import static org.firstinspires.ftc.teamcode.Constants.CLAW_ROTATOR_SCORING_POSITION;
+import static org.firstinspires.ftc.teamcode.Constants.ArmRaiserPos;
+import static org.firstinspires.ftc.teamcode.Constants.ArmRaiserPos.ARM_DOWN;
+import static org.firstinspires.ftc.teamcode.Constants.ArmRaiserPos.ARM_UP;
+import static org.firstinspires.ftc.teamcode.Constants.ArmRotatorPos;
+import static org.firstinspires.ftc.teamcode.Constants.ArmRotatorPos.ARM_COLLECTING;
+import static org.firstinspires.ftc.teamcode.Constants.ArmRotatorPos.ARM_SCORING;
 import static org.firstinspires.ftc.teamcode.Constants.CONTROLLER_ELEMENT_STATE;
 import static org.firstinspires.ftc.teamcode.Constants.CONTROLLER_ELEMENT_STATE.HELD;
 import static org.firstinspires.ftc.teamcode.Constants.CONTROLLER_ELEMENT_STATE.PRESSED;
+import static org.firstinspires.ftc.teamcode.Constants.CONTROLLER_ELEMENT_STATE.RELEASED;
+import static org.firstinspires.ftc.teamcode.Constants.GripperState;
+import static org.firstinspires.ftc.teamcode.Constants.GripperState.CLOSE;
 import static org.firstinspires.ftc.teamcode.Constants.HOLONOMIC_SPEED;
 import static org.firstinspires.ftc.teamcode.Constants.RESOLUTION_HEIGHT;
 import static org.firstinspires.ftc.teamcode.Constants.RESOLUTION_WIDTH;
@@ -46,18 +46,18 @@ import static org.firstinspires.ftc.teamcode.Constants.TELEOP_STATE;
 import static org.firstinspires.ftc.teamcode.Constants.TELEOP_STATE.AUTO;
 import static org.firstinspires.ftc.teamcode.Constants.TELEOP_STATE.MANUAL;
 import static org.firstinspires.ftc.teamcode.Constants.TURNING_POWER_SCALAR;
+import static org.firstinspires.ftc.teamcode.Constants.WristState;
+import static org.firstinspires.ftc.teamcode.Constants.WristState.COLLECT;
 
 public abstract class TeleopBase extends OpMode {
 
     protected static AllianceColor allianceColor;
 
     private OpenCvWebcam webcam;
-    private int x1, x2, y1, y2;
+    private int x1, x2, y1, y2;  // Webcam area of interest tuning
 
     private Gamepad g1;
     private Gamepad g2;
-
-    private TELEOP_STATE state;
 
     // Motors
     private DcMotor leftFront;
@@ -80,11 +80,20 @@ public abstract class TeleopBase extends OpMode {
     private double currentRobotAngle;
     private double targetAngle;
 
-    // Toggle booleans
-    private boolean clawGrabberOpen;
-    private boolean clawRotatorScoring;
-    private boolean armRotatorScoring;
-    private boolean armRaiserScoring;
+    private DigitalChannel liftLimit;
+    private DigitalChannel armLimit;
+    private BinaryComponent liftLimitComponent;
+    private BinaryComponent armLimitComponent;
+
+    private int liftOffset;
+    private int armOffset;
+
+    private GripperState gripperState;
+    private WristState wristState;
+    private ArmRotatorPos armRotatorPos;
+    private ArmRaiserPos armRaiserPos;
+
+    private TELEOP_STATE state;
 
     public void init() {
 
@@ -93,6 +102,11 @@ public abstract class TeleopBase extends OpMode {
         state = MANUAL;
 
         allianceColor = getAllianceColor();
+
+        gripperState = CLOSE;
+        wristState = COLLECT;
+        armRotatorPos = ARM_SCORING;
+        armRaiserPos = ARM_UP;
 
         /*Instantiating the motor and servo objects as their appropriate motor/servo in the
         configuration on the robot*/
@@ -104,9 +118,9 @@ public abstract class TeleopBase extends OpMode {
         armRaiser = hardwareMap.get(DcMotor.class, "armRaiser");
 
         clawRotator = hardwareMap.get(Servo.class, "clawRotator");
-        clawRotator.setPosition(CLAW_ROTATOR_COLLECTING_POSITION);
+        clawRotator.setPosition(wristState.pos);
         clawGrabber = hardwareMap.get(Servo.class, "clawGrabber");
-        clawGrabber.setPosition(CLAW_GRABBER_CLOSE_POSITION);
+        clawGrabber.setPosition(gripperState.pos);
 
         armRotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armRotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -115,12 +129,6 @@ public abstract class TeleopBase extends OpMode {
         armRaiser.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         armRaiser.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         armRaiser.setTargetPosition(0);
-
-        clawGrabberOpen = false;
-        clawRotatorScoring = false;
-        armRotatorScoring = false;
-        armRaiserScoring = false;
-
 
         // Initializing the RevHub IMU
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -135,6 +143,14 @@ public abstract class TeleopBase extends OpMode {
         angles = null;
         currentRobotAngle = 0.0;
         angleOffset = allianceColor.angleOffset;
+
+        liftLimit = hardwareMap.get(DigitalChannel.class, "liftLimit");
+        liftLimit.setMode(DigitalChannel.Mode.INPUT);
+        //armLimit = hardwareMap.get(DigitalChannel.class, "armLimit");
+        //armLimit.setMode(DigitalChannel.Mode.INPUT);
+
+        liftLimitComponent = new BinaryComponent();
+        armLimitComponent = new BinaryComponent();
 
         configureState();
     }
@@ -174,15 +190,20 @@ public abstract class TeleopBase extends OpMode {
         telemetry.addData("g2x", g2.x.getState());
         telemetry.addData("g2_left_stick_y", g2.left_stick_y.component);
         telemetry.addData("g2_left_stick_x", g2.left_stick_x.component);
-        telemetry.addData("clawRotatorScoring", clawRotatorScoring);
         telemetry.addData("armRotator.position", armRotator.getCurrentPosition());
         telemetry.addData("armRaiser.position", armRaiser.getCurrentPosition());
         telemetry.addData("clawGrabber.position", clawGrabber.getPosition());
         telemetry.addData("clawRotator.position", clawRotator.getPosition());
+        telemetry.addData("wristState", wristState.name());
+        telemetry.addData("wristState.pos", wristState.pos);
 
         // Update the custom gamepad objects.
         g1.update();
         g2.update();
+        liftLimitComponent.update(liftLimit.getState());
+        //armLimitComponent.update(armLimit.getState());
+
+        telemetry.addData("liftLimit", liftLimitComponent.getState());
 
         // Update the internal IMU orientation variables to eliminate extra calls to the IMU in loop.
         getAngle();
@@ -231,13 +252,14 @@ public abstract class TeleopBase extends OpMode {
     }
 
     private void manualLoop() {
+        if (liftLimitComponent.getState() == PRESSED || liftLimitComponent.getState() == RELEASED) {
+            liftOffset = armRaiser.getCurrentPosition();
+        }
+
         // Actuate the arm raiser.
         switch (g2.left_stick_y.getState()) {
-            case PRESSED:
-                armRaiser.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                break;
             case HELD:
-                if (g2.right_stick_button.getState() != HELD) {   // If the right stick button is held, let the arm go past the limit.
+                /*if (g2.right_stick_button.getState() != HELD) {   // If the right stick button is held, let the arm go past the limit.
                     if ((g2.left_stick_y.component > 0 && armRaiser.getCurrentPosition() < ARM_RAISER_MAX_POSITION) ||  // If the arm is trying to go up and can do so, or
                             (g2.left_stick_y.component < 0 && armRaiser.getCurrentPosition() > ARM_RAISER_MIN_POSITION)) { // if the arm is trying to go down and can do so.
                         armRaiser.setPower(g2.left_stick_y.component);
@@ -245,16 +267,22 @@ public abstract class TeleopBase extends OpMode {
                     } else {
                         armRaiser.setPower(0.0);
                     }
-
-                    /*telemetry.addData("Can move", (g2.left_stick_y.component > 0 && armRaiser.getCurrentPosition() < ARM_RAISER_MAX_POSITION) ||
-                            (g2.left_stick_y.component < 0 && armRaiser.getCurrentPosition() > ARM_RAISER_MIN_POSITION));
-                    telemetry.addData("Can lower", (g2.left_stick_y.component < 0 && armRaiser.getCurrentPosition() > ARM_RAISER_MIN_POSITION));
-                    telemetry.addData("Can raise", (g2.left_stick_y.component > 0 && armRaiser.getCurrentPosition() < ARM_RAISER_MAX_POSITION));
-                    telemetry.addData("armRaiser.position", armRaiser.getCurrentPosition());*/
                 }
 
                 else armRaiser.setPower(g2.left_stick_y.component);  // Lets the arm move without limits if the right stick is pressed.
+*/
+                if (g2.right_stick_button.getState() != HELD) {
+                    if (armRaiser.getMode() != DcMotor.RunMode.RUN_TO_POSITION) armRaiser.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
+                    if (g2.left_stick_y.component > 0) armRaiser.setTargetPosition(ARM_RAISER_MAX_POSITION - armOffset);
+                    else if (g2.left_stick_y.component < 0 && liftLimit.getState()) armRaiser.setTargetPosition(ARM_RAISER_MIN_POSITION - armOffset);
+                    else if (!liftLimit.getState()) armRaiser.setTargetPosition(0);
+
+                    armRaiser.setPower(g2.left_stick_y.component);
+                } else {
+                    if (armRaiser.getMode() != DcMotor.RunMode.RUN_USING_ENCODER) armRaiser.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    armRaiser.setPower(g2.left_stick_y.component);
+                }
                 break;
             case RELEASED:
                 armRaiser.setTargetPosition(armRaiser.getCurrentPosition());
@@ -442,52 +470,58 @@ public abstract class TeleopBase extends OpMode {
      * Arm Controls
      */
     private void armRaise() {
-        if (armRaiserScoring) {
-            armRaiserScoring = false;
-            armRaiser.setPower(ARM_RAISER_RAISE_SPEED);
-            armRaiser.setTargetPosition(ARM_RAISER_SCORING_POSITION);
-        } else {
-            armRaiserScoring = true;
-            armRaiser.setPower(ARM_RAISER_LOWER_SPEED);
-            armRaiser.setTargetPosition(ARM_RAISER_COLLECTING_POSITION);
+        switch (armRaiserPos) {
+            case ARM_DOWN:
+                armRaiserPos = ARM_UP;
+                break;
+            case ARM_UP:
+                armRaiserPos = ARM_DOWN;
+                break;
         }
+        armRaiser.setTargetPosition(armRaiserPos.pos);
     }
 
 
     private void armRotate() {
-        if (armRotatorScoring) {
-            armRotatorScoring = false;
-            armRotator.setTargetPosition((ARM_ROTATOR_SCORING_POSITION));
-        } else {
-            armRotatorScoring = true;
-            armRotator.setTargetPosition((ARM_ROTATOR_COLLECTING_POSITION));
+        switch (armRotatorPos) {
+            case ARM_COLLECTING:
+                armRotatorPos = ARM_SCORING;
+                break;
+            case ARM_SCORING:
+                armRotatorPos = ARM_COLLECTING;
+                break;
         }
+        armRotator.setTargetPosition(armRotatorPos.pos);
     }
 
     /**
      * Claw Controls
      */
     private void clawRotate()   {
-        if (clawRotatorScoring) {
-            clawRotatorScoring = false;
-            clawRotator.setPosition(CLAW_ROTATOR_SCORING_POSITION);
-        } else {
-            clawRotatorScoring = true;
-            clawRotator.setPosition((CLAW_ROTATOR_COLLECTING_POSITION));
+        switch (wristState) {
+            case SCORE:
+                wristState = WristState.COLLECT;
+                break;
+            case COLLECT:
+                wristState = WristState.SCORE;
+                break;
         }
+        clawRotator.setPosition(wristState.pos);
     }
 
     /**
      * Toggle for claw grabber (open and close)
      */
     private void clawGrabber() {
-        if (clawGrabberOpen) {
-            clawGrabberOpen = false;
-            clawGrabber.setPosition(CLAW_GRABBER_CLOSE_POSITION);
-        } else {
-            clawGrabberOpen = true;
-            clawGrabber.setPosition((CLAW_GRABBER_OPEN_POSITION));
+        switch (gripperState) {
+            case CLOSE:
+                gripperState = GripperState.OPEN;
+                break;
+            case OPEN:
+                gripperState = GripperState.CLOSE;
+                break;
         }
+        clawGrabber.setPosition(gripperState.pos);
     }
 
     private void configureState() {
