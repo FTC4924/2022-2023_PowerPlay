@@ -59,24 +59,24 @@ public class Constants {
         }
     }
 
-    public enum ArmRaiserPos {
-        ARM_UP(2350),
-        ARM_DOWN(20);
+    public enum LiftPos {
+        LIFT_UP(2350),
+        LIFT_DOWN(20);
 
         public final int pos;
 
-        ArmRaiserPos(int pos) {
+        LiftPos(int pos) {
             this.pos = pos;
         }
     }
 
-    public enum ArmRotatorPos {
+    public enum ArmPos {
         ARM_SCORING(2250),
         ARM_COLLECTING(-2250);
 
         public final int pos;
 
-        ArmRotatorPos(int pos) {
+        ArmPos(int pos) {
             this.pos = pos;
         }
     }

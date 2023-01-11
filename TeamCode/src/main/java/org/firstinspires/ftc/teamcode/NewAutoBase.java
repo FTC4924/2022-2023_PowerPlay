@@ -22,7 +22,7 @@ public abstract class NewAutoBase extends CommandOpMode {
                 "rightBack"
         );
 
-        gripper = new ClawSubsystem(hardwareMap, "gripper");
+        gripper = new ClawSubsystem(hardwareMap, "gripper", "wrist");
 
         roadRunner = new RoadRunnerSubsystem(hardwareMap);
 

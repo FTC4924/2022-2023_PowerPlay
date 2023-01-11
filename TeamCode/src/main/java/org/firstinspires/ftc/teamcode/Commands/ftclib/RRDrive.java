@@ -14,7 +14,6 @@ public class RRDrive extends CommandBase {
         this.trajectory = trajectory;
         this.roadRunnerSubsystem = roadRunnerSubsystem;
         addRequirements(roadRunnerSubsystem);
-
     }
 
     @Override

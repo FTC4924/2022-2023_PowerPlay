@@ -27,12 +27,12 @@ import static org.firstinspires.ftc.teamcode.Constants.ARM_CORRECTIVE_POWER;
 import static org.firstinspires.ftc.teamcode.Constants.ARM_POWER;
 import static org.firstinspires.ftc.teamcode.Constants.ARM_RAISER_MAX_POSITION;
 import static org.firstinspires.ftc.teamcode.Constants.ARM_RAISER_MIN_POSITION;
-import static org.firstinspires.ftc.teamcode.Constants.ArmRaiserPos;
-import static org.firstinspires.ftc.teamcode.Constants.ArmRaiserPos.ARM_DOWN;
-import static org.firstinspires.ftc.teamcode.Constants.ArmRaiserPos.ARM_UP;
-import static org.firstinspires.ftc.teamcode.Constants.ArmRotatorPos;
-import static org.firstinspires.ftc.teamcode.Constants.ArmRotatorPos.ARM_COLLECTING;
-import static org.firstinspires.ftc.teamcode.Constants.ArmRotatorPos.ARM_SCORING;
+import static org.firstinspires.ftc.teamcode.Constants.LiftPos;
+import static org.firstinspires.ftc.teamcode.Constants.LiftPos.LIFT_DOWN;
+import static org.firstinspires.ftc.teamcode.Constants.LiftPos.LIFT_UP;
+import static org.firstinspires.ftc.teamcode.Constants.ArmPos;
+import static org.firstinspires.ftc.teamcode.Constants.ArmPos.ARM_COLLECTING;
+import static org.firstinspires.ftc.teamcode.Constants.ArmPos.ARM_SCORING;
 import static org.firstinspires.ftc.teamcode.Constants.CONTROLLER_ELEMENT_STATE;
 import static org.firstinspires.ftc.teamcode.Constants.CONTROLLER_ELEMENT_STATE.HELD;
 import static org.firstinspires.ftc.teamcode.Constants.CONTROLLER_ELEMENT_STATE.PRESSED;
@@ -90,8 +90,8 @@ public abstract class TeleopBase extends OpMode {
 
     private GripperState gripperState;
     private WristState wristState;
-    private ArmRotatorPos armRotatorPos;
-    private ArmRaiserPos armRaiserPos;
+    private ArmPos armPos;
+    private LiftPos liftPos;
 
     private TELEOP_STATE state;
 
@@ -105,8 +105,8 @@ public abstract class TeleopBase extends OpMode {
 
         gripperState = CLOSE;
         wristState = COLLECT;
-        armRotatorPos = ARM_SCORING;
-        armRaiserPos = ARM_UP;
+        armPos = ARM_SCORING;
+        liftPos = LIFT_UP;
 
         /*Instantiating the motor and servo objects as their appropriate motor/servo in the
         configuration on the robot*/
@@ -470,28 +470,28 @@ public abstract class TeleopBase extends OpMode {
      * Arm Controls
      */
     private void armRaise() {
-        switch (armRaiserPos) {
-            case ARM_DOWN:
-                armRaiserPos = ARM_UP;
+        switch (liftPos) {
+            case LIFT_DOWN:
+                liftPos = LIFT_UP;
                 break;
-            case ARM_UP:
-                armRaiserPos = ARM_DOWN;
+            case LIFT_UP:
+                liftPos = LIFT_DOWN;
                 break;
         }
-        armRaiser.setTargetPosition(armRaiserPos.pos);
+        armRaiser.setTargetPosition(liftPos.pos);
     }
 
 
     private void armRotate() {
-        switch (armRotatorPos) {
+        switch (armPos) {
             case ARM_COLLECTING:
-                armRotatorPos = ARM_SCORING;
+                armPos = ARM_SCORING;
                 break;
             case ARM_SCORING:
-                armRotatorPos = ARM_COLLECTING;
+                armPos = ARM_COLLECTING;
                 break;
         }
-        armRotator.setTargetPosition(armRotatorPos.pos);
+        armRotator.setTargetPosition(armPos.pos);
     }
 
     /**
