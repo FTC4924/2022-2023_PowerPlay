@@ -2,14 +2,16 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.command.button.Trigger;
-import com.arcrobotics.ftclib.util.MathUtils;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import static org.firstinspires.ftc.teamcode.Constants.*;
+import static org.firstinspires.ftc.teamcode.Constants.ARM_RAISER_MAX_POSITION;
+import static org.firstinspires.ftc.teamcode.Constants.ARM_RAISER_MIN_POSITION;
+import static org.firstinspires.ftc.teamcode.Constants.ArmPos;
+import static org.firstinspires.ftc.teamcode.Constants.LiftPos;
 
 public class ArmSubsystem extends SubsystemBase {
 
@@ -40,10 +42,10 @@ public class ArmSubsystem extends SubsystemBase {
 
         liftLimit.setMode(DigitalChannel.Mode.INPUT);
         //this.armLimit.setMode(DigitalChannel.Mode.INPUT);
-        this.armLimit = null;
+        this.armLimit = null; // TODO: 1/13/2023 Change for the addition of the arm limit switch
 
         liftPressed = new Trigger(this::liftPressed).whenActive(this::resetLift).whenInactive(this::stopAndResetLift);
-        armPressed = new Trigger(null).whenActive(this::resetArm).whenInactive(this::resetArm);
+        armPressed = new Trigger(this::armPressed).whenActive(this::resetArm).whenInactive(this::resetArm);
     }
 
     public ArmSubsystem(HardwareMap hardwareMap, String lift, String arm, String liftLimitSwitch, String armLimitSwitch) {
@@ -52,7 +54,7 @@ public class ArmSubsystem extends SubsystemBase {
                 hardwareMap.get(DcMotorEx.class, lift),
                 hardwareMap.get(DcMotorEx.class, arm),
                 hardwareMap.get(DigitalChannel.class, liftLimitSwitch),
-                null // TODO: 1/10/2023 Change to getting the switch from the hardware map once the switch is installed.
+                null // TODO: 1/13/2023 Change for the addition of the arm limit switch
         );
     }
 
@@ -60,8 +62,8 @@ public class ArmSubsystem extends SubsystemBase {
         return !liftLimit.getState();
     }
 
-    private boolean armPressed() {
-        return !armLimit.getState();
+    private boolean armPressed() { // TODO: 1/13/2023 Change for the addition of the arm limit switch
+        return false;//!armLimit.getState();
     }
 
     private void resetLift() {
@@ -80,7 +82,7 @@ public class ArmSubsystem extends SubsystemBase {
             return;
         }
 
-        if (Integer.signum(arm.getTargetPosition() - arm.getCurrentPosition()) != armZeroDirection) {  // Detect if we have reversed and come back out the other direction.
+        if (Integer.signum(arm.getTargetPosition() - arm.getCurrentPosition()) != armZeroDirection) {  // Detect if we have not reversed and come back out the other direction.
             armZeroDirection = 0;
             return;
         }
