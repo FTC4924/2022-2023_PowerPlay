@@ -20,6 +20,7 @@ public class DriveSubsystem extends SubsystemBase { // TODO: 12/13/2022 Rewrite 
 
     private final BNO055IMU imu;
     private Orientation angles;
+    private double angleOffset;
 
     public DriveSubsystem(MotorEx frontLeft, MotorEx frontRight, MotorEx backLeft, MotorEx backRight, BNO055IMU imu) {
         this.frontLeft = frontLeft;
@@ -50,8 +51,12 @@ public class DriveSubsystem extends SubsystemBase { // TODO: 12/13/2022 Rewrite 
     }
 
     public void drive(double strafeSpeed, double forwardSpeed, double turn) {
-        double heading = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, RADIANS).firstAngle;
+        double heading = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, RADIANS).firstAngle - angleOffset;
         xDrive.driveFieldCentric(strafeSpeed, forwardSpeed, turn, heading);
+    }
+
+    public void resetGyro() {
+
     }
 
     public void stop() { xDrive.stop(); }

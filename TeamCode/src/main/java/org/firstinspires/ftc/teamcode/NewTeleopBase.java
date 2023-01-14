@@ -1,14 +1,17 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.arcrobotics.ftclib.command.CommandOpMode;
+import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
+import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 
 import org.firstinspires.ftc.teamcode.subsystems.ArmSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ClawSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.RoadRunnerSubsystem;
+import static org.firstinspires.ftc.teamcode.Constants.*;
 
-public class NewTeleopBase extends CommandOpMode {
+public abstract class NewTeleopBase extends CommandOpMode {
     protected DriveSubsystem drive;
     protected ClawSubsystem gripper;
     protected ArmSubsystem arm;
@@ -16,6 +19,12 @@ public class NewTeleopBase extends CommandOpMode {
 
     private GamepadEx gpad1;
     private GamepadEx gpad2;
+
+    private TELEOP_STATE teleopState;
+
+    private Trigger stateManual;
+    private Trigger stateAuto;
+    private Trigger stateTest;
 
     @Override
     public void initialize() {
@@ -42,10 +51,36 @@ public class NewTeleopBase extends CommandOpMode {
         gpad1 = new GamepadEx(gamepad1);
         gpad2 = new GamepadEx(gamepad2);
 
+        teleopState = TELEOP_STATE.MANUAL;
+
+
+
+        gpad1.getGamepadButton(GamepadKeys.Button.DPAD_UP).and(stateManual);
+
+        ///////////////////////////// Gamepad 1 keybindings /////////////////////////////
+
+        gpad1.getGamepadButton(GamepadKeys.Trigger.)
+
+        gpad2.getGamepadButton(GamepadKeys.Button.X).whenInactive(this::configureState);  // Change the state on gpad 2 button x regardless of state.
+
 
 
         //schedule(new InstantCommand().andThen(getCommands()));
 
         register(drive, gripper, roadRunner, arm);
+    }
+
+    private void configureState() {
+        switch (teleopState) {
+            case MANUAL:
+                teleopState = TELEOP_STATE.AUTO;
+                break;
+            case AUTO:
+                teleopState = TELEOP_STATE.MANUAL;
+                break;
+            case TEST:
+                teleopState = TELEOP_STATE.MANUAL;
+                break;
+        }
     }
 }
