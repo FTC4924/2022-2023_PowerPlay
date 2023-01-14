@@ -27,9 +27,6 @@ import static org.firstinspires.ftc.teamcode.Constants.ARM_CORRECTIVE_POWER;
 import static org.firstinspires.ftc.teamcode.Constants.ARM_POWER;
 import static org.firstinspires.ftc.teamcode.Constants.ARM_RAISER_MAX_POSITION;
 import static org.firstinspires.ftc.teamcode.Constants.ARM_RAISER_MIN_POSITION;
-import static org.firstinspires.ftc.teamcode.Constants.LiftPos;
-import static org.firstinspires.ftc.teamcode.Constants.LiftPos.LIFT_DOWN;
-import static org.firstinspires.ftc.teamcode.Constants.LiftPos.LIFT_UP;
 import static org.firstinspires.ftc.teamcode.Constants.ArmPos;
 import static org.firstinspires.ftc.teamcode.Constants.ArmPos.ARM_COLLECTING;
 import static org.firstinspires.ftc.teamcode.Constants.ArmPos.ARM_SCORING;
@@ -40,6 +37,9 @@ import static org.firstinspires.ftc.teamcode.Constants.CONTROLLER_ELEMENT_STATE.
 import static org.firstinspires.ftc.teamcode.Constants.GripperState;
 import static org.firstinspires.ftc.teamcode.Constants.GripperState.CLOSE;
 import static org.firstinspires.ftc.teamcode.Constants.HOLONOMIC_SPEED;
+import static org.firstinspires.ftc.teamcode.Constants.LiftPos;
+import static org.firstinspires.ftc.teamcode.Constants.LiftPos.LIFT_DOWN;
+import static org.firstinspires.ftc.teamcode.Constants.LiftPos.LIFT_UP;
 import static org.firstinspires.ftc.teamcode.Constants.RESOLUTION_HEIGHT;
 import static org.firstinspires.ftc.teamcode.Constants.RESOLUTION_WIDTH;
 import static org.firstinspires.ftc.teamcode.Constants.TELEOP_STATE;
@@ -114,12 +114,12 @@ public abstract class TeleopBase extends OpMode {
         leftBack = hardwareMap.get(DcMotor.class, "leftBack");
         rightFront = hardwareMap.get(DcMotor.class, "rightFront");
         rightBack = hardwareMap.get(DcMotor.class, "rightBack");
-        armRotator = hardwareMap.get(DcMotor.class, "armRotator");
-        armRaiser = hardwareMap.get(DcMotor.class, "armRaiser");
+        armRotator = hardwareMap.get(DcMotor.class, "arm");
+        armRaiser = hardwareMap.get(DcMotor.class, "lift");
 
-        clawRotator = hardwareMap.get(Servo.class, "clawRotator");
+        clawRotator = hardwareMap.get(Servo.class, "wrist");
         clawRotator.setPosition(wristState.pos);
-        clawGrabber = hardwareMap.get(Servo.class, "clawGrabber");
+        clawGrabber = hardwareMap.get(Servo.class, "gripper");
         clawGrabber.setPosition(gripperState.pos);
 
         armRotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
