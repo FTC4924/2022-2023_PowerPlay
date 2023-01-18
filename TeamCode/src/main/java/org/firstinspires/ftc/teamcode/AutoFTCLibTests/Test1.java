@@ -13,10 +13,12 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 public class Test1 extends NewAutoBase {
     @Override
     protected Command getCommands() {
-        TrajectorySequence traj1 = roadRunner.trajectorySequenceBuilder(new Pose2d())
-                .splineTo(new Vector2d(10,10), 0)
-                .splineTo(new Vector2d(0, 20), 0)
+        TrajectorySequence traj1 = roadRunner.trajectorySequenceBuilder(new Pose2d(-32, -62, Math.toRadians(90)))
+                //.setVelConstraint(SampleMecanumDriveCancelable.getVelocityConstraint(25, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH))
+                .splineToConstantHeading(new Vector2d(-45,-35), Math.toRadians(90))
+                .splineToConstantHeading(new Vector2d(-20,-35), Math.toRadians(90))
                 .build();
         return new RRDrive(roadRunner, traj1);
     }
+
 }

@@ -13,8 +13,7 @@ import static org.firstinspires.ftc.teamcode.Constants.ROI;
 import static org.firstinspires.ftc.teamcode.Constants.SignalSide;
 import static org.firstinspires.ftc.teamcode.Constants.YELLOW;
 
-public class SignalDetectionPipeline extends OpenCvPipeline
-{
+public class SignalDetectionPipeline extends OpenCvPipeline {
 
     private int redMean;
     private int greenMean;

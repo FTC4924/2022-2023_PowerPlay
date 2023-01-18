@@ -307,6 +307,11 @@ public abstract class TeleopBase extends OpMode {
         }
 
         // Actuate the claw grabber.
+        switch(g2.left_bumper.getState()) {
+            case PRESSED:
+                clawGrabber();
+                break;
+        }
         switch(g2.y.getState()) {
             case PRESSED:
                 clawGrabber();
@@ -314,6 +319,11 @@ public abstract class TeleopBase extends OpMode {
         }
 
         // Rotate the claw
+        switch (g2.right_bumper.getState()) {
+            case PRESSED:
+                clawRotate();
+                break;
+        }
         switch (g2.b.getState()) {
             case PRESSED:
                 clawRotate();

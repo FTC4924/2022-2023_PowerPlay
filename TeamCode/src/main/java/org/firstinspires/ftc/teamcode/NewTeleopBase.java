@@ -9,7 +9,8 @@ import org.firstinspires.ftc.teamcode.subsystems.ArmSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ClawSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.RoadRunnerSubsystem;
-import static org.firstinspires.ftc.teamcode.Constants.*;
+
+import static org.firstinspires.ftc.teamcode.Constants.TELEOP_STATE;
 
 public abstract class NewTeleopBase extends CommandOpMode {
     protected DriveSubsystem drive;
@@ -59,7 +60,7 @@ public abstract class NewTeleopBase extends CommandOpMode {
 
         ///////////////////////////// Gamepad 1 keybindings /////////////////////////////
 
-        gpad1.getGamepadButton(GamepadKeys.Trigger.)
+       // gpad1.getGamepadButton(GamepadKeys.Trigger.values());
 
         gpad2.getGamepadButton(GamepadKeys.Button.X).whenInactive(this::configureState);  // Change the state on gpad 2 button x regardless of state.
 
