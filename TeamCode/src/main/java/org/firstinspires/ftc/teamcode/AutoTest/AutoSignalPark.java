@@ -34,7 +34,7 @@ public class AutoSignalPark extends AutoBase {
                         new LoadSignalSide(
                                 new ArrayList<>(
                                         Collections.singletonList(
-                                                new Move(2.1, 90, 0.4)
+                                                new Move(1.9, 90, 0.4)
                                         )
                                 ),
                                 new ArrayList<>(
