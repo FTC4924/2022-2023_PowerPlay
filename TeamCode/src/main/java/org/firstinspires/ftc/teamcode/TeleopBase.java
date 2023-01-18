@@ -100,12 +100,12 @@ public abstract class TeleopBase extends OpMode {
         leftBack = hardwareMap.get(DcMotor.class, "leftBack");
         rightFront = hardwareMap.get(DcMotor.class, "rightFront");
         rightBack = hardwareMap.get(DcMotor.class, "rightBack");
-        armRotator = hardwareMap.get(DcMotor.class, "armRotator");
-        armRaiser = hardwareMap.get(DcMotor.class, "armRaiser");
+        armRotator = hardwareMap.get(DcMotor.class, "arm");
+        armRaiser = hardwareMap.get(DcMotor.class, "lift");
 
-        clawRotator = hardwareMap.get(Servo.class, "clawRotator");
+        clawRotator = hardwareMap.get(Servo.class, "wrist");
         clawRotator.setPosition(CLAW_ROTATOR_COLLECTING_POSITION);
-        clawGrabber = hardwareMap.get(Servo.class, "clawGrabber");
+        clawGrabber = hardwareMap.get(Servo.class, "gripper");
         clawGrabber.setPosition(CLAW_GRABBER_CLOSE_POSITION);
 
         armRotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);

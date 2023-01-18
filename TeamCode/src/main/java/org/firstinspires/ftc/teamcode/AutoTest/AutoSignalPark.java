@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.AllianceColor;
 import org.firstinspires.ftc.teamcode.AutoBase;
+import org.firstinspires.ftc.teamcode.Commands.ArmRotate;
 import org.firstinspires.ftc.teamcode.Commands.Command;
 import org.firstinspires.ftc.teamcode.Commands.DetectSignalSide;
 import org.firstinspires.ftc.teamcode.Commands.LoadSignalSide;
@@ -25,6 +26,7 @@ public class AutoSignalPark extends AutoBase {
     protected ArrayList<Command> getCommands() {
         return new ArrayList<Command>(
                 Arrays.asList(
+                        new ArmRotate(0.75),
                         new Pause(0.125),
                         new DetectSignalSide(),
                         new Move(2.9 - CHASSIS_RADIUS,0.4),

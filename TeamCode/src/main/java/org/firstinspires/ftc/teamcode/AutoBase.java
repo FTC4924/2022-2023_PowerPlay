@@ -118,21 +118,21 @@ public abstract class AutoBase extends OpMode {
         rightBack.setTargetPosition(0);
         rightBack.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        arm = hardwareMap.get(DcMotor.class, "armRotator");
+        arm = hardwareMap.get(DcMotor.class, "arm");
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         arm.setTargetPosition(0);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         arm.setPower(0.25);
         arm.setDirection(DcMotorSimple.Direction.REVERSE);
-        lift = hardwareMap.get(DcMotor.class, "armRaiser");
+        lift = hardwareMap.get(DcMotor.class, "lift");
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setTargetPosition(0);
         lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         lift.setPower(0.35);
 
-        wrist = hardwareMap.get(Servo.class, "clawRotator");
+        wrist = hardwareMap.get(Servo.class, "wrist");
         wrist.setPosition(CLAW_ROTATOR_COLLECTING_POSITION);
-        gripper = hardwareMap.get(Servo.class, "clawGrabber");
+        gripper = hardwareMap.get(Servo.class, "gripper");
         gripper.setPosition(CLAW_GRABBER_CLOSE_POSITION);
 
         mainDiagonalPercent = 0;

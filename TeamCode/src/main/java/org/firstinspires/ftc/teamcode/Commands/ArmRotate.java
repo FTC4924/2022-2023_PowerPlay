@@ -14,4 +14,8 @@ public class ArmRotate extends Command {
     public ArmRotate(@FloatRange(from = 0.0, to = 1.0) double percent) {
         this.position = (int)(ARM_ROTATOR_COLLECTING_POSITION + percent * (ARM_ROTATOR_SCORING_POSITION - ARM_ROTATOR_COLLECTING_POSITION));
     }
+
+    public ArmRotate(int pos) {
+        this.position = pos;
+    }
 }
