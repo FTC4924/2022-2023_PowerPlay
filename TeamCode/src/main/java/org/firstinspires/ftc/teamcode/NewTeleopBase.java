@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandOpMode;
+import com.arcrobotics.ftclib.command.ConditionalCommand;
+import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
@@ -54,9 +57,34 @@ public abstract class NewTeleopBase extends CommandOpMode {
 
         teleopState = TELEOP_STATE.MANUAL;
 
+        // TODO: 1/24/2023 Instantiate Commands for buttons here
+        Command clawToggle = new ConditionalCommand(
+                new InstantCommand(gripper::gripperClose),
+                new InstantCommand(gripper::gripperOpen),
+                () -> gripper.getGripperPos() >= 0.5
+        );
+
+        Command wristToggle = new ConditionalCommand(
+                new InstantCommand(gripper::wristScore),
+                new InstantCommand(gripper::wristCollect),
+                () -> gripper.getWristPos() >= 0.5
+        );
 
 
-        gpad1.getGamepadButton(GamepadKeys.Button.DPAD_UP).and(stateManual);
+
+
+        gpad2.getGamepadButton(GamepadKeys.Button.Y)
+                .or(gpad2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER))
+                .and(stateManual)
+                .whenActive(clawToggle);
+
+        gpad2.getGamepadButton(GamepadKeys.Button.B)
+                .or(gpad2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER))
+                .and(stateManual)
+                .whenActive(wristToggle);
+
+        gpad1.getGamepadButton(GamepadKeys.Button.A).and(stateManual).whenActive(clawToggle);
+
 
         ///////////////////////////// Gamepad 1 keybindings /////////////////////////////
 
@@ -69,6 +97,16 @@ public abstract class NewTeleopBase extends CommandOpMode {
         //schedule(new InstantCommand().andThen(getCommands()));
 
         register(drive, gripper, roadRunner, arm);
+    }
+
+    private void armScoring() {
+        arm.setArm(1.0);
+    }
+    private void armCollect() {
+        arm.setArm(0.0);
+        }
+    private void armM() {
+        arm.setArm(gpad2.gamepad.right_stick_y);
     }
 
     private void configureState() {

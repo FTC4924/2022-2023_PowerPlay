@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
@@ -39,6 +40,10 @@ public abstract class NewAutoBase extends CommandOpMode {
         schedule(new InstantCommand().andThen(getCommands()));
 
         register(drive, gripper, roadRunner, arm);
+    }
+    
+    public void setRoadRunnerStart(Pose2d pose2d) {
+        roadRunner.setPoseEstimate(pose2d);
     }
 
     protected abstract Command getCommands();

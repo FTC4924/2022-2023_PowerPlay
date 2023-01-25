@@ -16,6 +16,10 @@ public class RoadRunnerSubsystem extends SubsystemBase {
         drive = new SampleMecanumDriveCancelable(hardwareMap);
     }
 
+    public void setPoseEstimate(Pose2d pose2d) {
+        drive.setPoseEstimate(pose2d);
+    }
+
     @Override
     public void periodic() {
         drive.update();
