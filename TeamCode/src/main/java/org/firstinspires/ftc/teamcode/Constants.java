@@ -49,8 +49,8 @@ public class Constants {
     }
 
     public enum GripperState {
-        CLOSE(0.1588),
-        OPEN(0.5416);
+        CLOSE(0.38),
+        OPEN(0.8);
 
         public final double pos;
 
