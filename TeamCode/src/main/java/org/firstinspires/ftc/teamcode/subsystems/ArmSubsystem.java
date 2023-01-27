@@ -1,5 +1,10 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import static org.firstinspires.ftc.teamcode.Constants.ARM_RAISER_MAX_POSITION;
+import static org.firstinspires.ftc.teamcode.Constants.ARM_RAISER_MIN_POSITION;
+import static org.firstinspires.ftc.teamcode.Constants.ArmPos;
+import static org.firstinspires.ftc.teamcode.Constants.LiftPos;
+
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -7,11 +12,6 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
-import static org.firstinspires.ftc.teamcode.Constants.ARM_RAISER_MAX_POSITION;
-import static org.firstinspires.ftc.teamcode.Constants.ARM_RAISER_MIN_POSITION;
-import static org.firstinspires.ftc.teamcode.Constants.ArmPos;
-import static org.firstinspires.ftc.teamcode.Constants.LiftPos;
 
 public class ArmSubsystem extends SubsystemBase {
 
@@ -21,6 +21,7 @@ public class ArmSubsystem extends SubsystemBase {
     private final DigitalChannel armLimit;
     private final Trigger liftPressed;
     private final Trigger armPressed;
+    private boolean liftOverride;
     private int liftOffset;
     private int armOffset;
 
@@ -71,7 +72,7 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     private void stopAndResetLift() {
-        lift.setTargetPosition(lift.getCurrentPosition());
+        if (liftOverride) stopLift();
         resetLift();
     }
 
@@ -109,6 +110,10 @@ public class ArmSubsystem extends SubsystemBase {
         lift.setPower(power);
     }
 
+    public void stopLift() {
+        lift.setTargetPosition(lift.getCurrentPosition());
+    }
+
     public void zeroLift() {
         lift.setTargetPosition(Integer.MIN_VALUE);
     }
@@ -123,6 +128,10 @@ public class ArmSubsystem extends SubsystemBase {
 
     public void setArm(int pos) {
         arm.setTargetPosition(pos + armOffset);
+    }
+
+    public void stopArm() {
+        arm.setTargetPosition(arm.getCurrentPosition());
     }
 
     public void setArmPower(double power) {
@@ -143,5 +152,9 @@ public class ArmSubsystem extends SubsystemBase {
 
     public boolean getArmBusy() {
         return arm.isBusy();
+    }
+
+    public void setLiftOverride(boolean override) {
+        liftOverride = override;
     }
 }

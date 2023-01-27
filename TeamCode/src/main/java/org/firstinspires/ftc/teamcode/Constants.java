@@ -1,10 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
+import androidx.annotation.FloatRange;
+
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
-
-import androidx.annotation.FloatRange;
 
 /**
  * Contains constants for all of the programs in one file for easy access.
@@ -93,7 +93,7 @@ public class Constants {
      * Defines the dead zone for controller input.
      */
     @FloatRange(from=0.0, to=1.0)
-    protected static final double ANALOG_THRESHOLD = 0.05;
+    public static final double ANALOG_THRESHOLD = 0.05;
     /**
      * Defines the tolerance for the angle error.
      */

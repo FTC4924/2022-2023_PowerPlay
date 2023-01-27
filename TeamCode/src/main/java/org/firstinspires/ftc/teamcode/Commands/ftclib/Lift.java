@@ -28,7 +28,7 @@ public class Lift extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return armSubsystem.getLiftBusy();
+        return !armSubsystem.getLiftBusy();
     }
 
     @Override

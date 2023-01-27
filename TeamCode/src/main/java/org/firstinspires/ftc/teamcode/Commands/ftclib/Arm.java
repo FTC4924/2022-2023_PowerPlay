@@ -28,7 +28,7 @@ public class Arm extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return armSubsystem.getArmBusy();
+        return !armSubsystem.getArmBusy();
     }
 
     @Override

@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.SubsystemBase;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.drive.PoseStorage;
@@ -46,4 +47,7 @@ public class RoadRunnerSubsystem extends SubsystemBase {
         return drive.trajectorySequenceBuilder(startPos);
     }
 
+    public void setMode(DcMotor.RunMode mode) {
+        drive.setMode(mode);
+    }
 }
