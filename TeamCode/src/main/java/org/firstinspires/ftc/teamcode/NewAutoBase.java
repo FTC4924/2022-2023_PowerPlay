@@ -6,6 +6,7 @@ import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
 
 import org.firstinspires.ftc.teamcode.subsystems.ArmSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.Camera;
 import org.firstinspires.ftc.teamcode.subsystems.ClawSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.RoadRunnerSubsystem;
@@ -15,6 +16,7 @@ public abstract class NewAutoBase extends CommandOpMode {
     protected ClawSubsystem gripper;
     protected ArmSubsystem arm;
     protected RoadRunnerSubsystem roadRunner;
+    protected Camera camera;
     @Override
     public void initialize() {
         drive = new DriveSubsystem(
@@ -36,6 +38,8 @@ public abstract class NewAutoBase extends CommandOpMode {
                 "liftLimit",
                 "null"  // TODO: 1/13/2023 Change for the addition of the arm limit switch
         );
+
+        camera = new Camera(hardwareMap, telemetry);
 
         schedule(new InstantCommand().andThen(getCommands()));
 

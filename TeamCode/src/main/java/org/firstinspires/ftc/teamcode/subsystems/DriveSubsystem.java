@@ -2,15 +2,11 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.drivebase.HDrive;
+import com.arcrobotics.ftclib.hardware.RevIMU;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
-import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-
-import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.RADIANS;
 
 public class DriveSubsystem extends SubsystemBase { // TODO: 12/13/2022 Rewrite to use RoadRunner.
 
@@ -18,45 +14,40 @@ public class DriveSubsystem extends SubsystemBase { // TODO: 12/13/2022 Rewrite 
 
     private final HDrive xDrive;
 
-    private final BNO055IMU imu;
+    private final RevIMU imu;
     private Orientation angles;
     private double angleOffset;
 
-    public DriveSubsystem(MotorEx frontLeft, MotorEx frontRight, MotorEx backLeft, MotorEx backRight, BNO055IMU imu) {
+    public DriveSubsystem(HardwareMap hardwareMap, MotorEx frontLeft, MotorEx frontRight, MotorEx backLeft, MotorEx backRight) {
         this.frontLeft = frontLeft;
         this.frontRight = frontRight;
         this.backLeft = backLeft;
         this.backRight = backRight;
 
-        this.xDrive = new HDrive(frontLeft, frontRight, backLeft, backRight);
+        this.xDrive = new HDrive(backRight, backLeft, frontRight, frontLeft);
 
-        BNO055IMU.Parameters imuParameters = new BNO055IMU.Parameters();
-        imuParameters.mode = BNO055IMU.SensorMode.IMU;
-        imuParameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        imuParameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        imuParameters.loggingEnabled = false;
-        imu.initialize(imuParameters);
-        this.imu = imu;
+        imu = new RevIMU(hardwareMap);
+        imu.init();
         angles = null;
     }
 
     public DriveSubsystem(HardwareMap hMap, String frontLeft, String frontRight, String backLeft, String backRight) {
         this(
+                hMap,
                 new MotorEx(hMap, frontLeft),
                 new MotorEx(hMap, frontRight),
                 new MotorEx(hMap, backLeft),
-                new MotorEx(hMap, backRight),
-                hMap.get(BNO055IMU.class, "imu")
+                new MotorEx(hMap, backRight)
         );
     }
 
     public void drive(double strafeSpeed, double forwardSpeed, double turn) {
-        double heading = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, RADIANS).firstAngle - angleOffset;
+        double heading = imu.getRotation2d().getDegrees() - angleOffset;
         xDrive.driveFieldCentric(strafeSpeed, forwardSpeed, turn, heading);
     }
 
     public void resetGyro() {
-
+        angleOffset = imu.getRotation2d().getDegrees();
     }
 
     public void stop() { xDrive.stop(); }

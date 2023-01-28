@@ -1,10 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import static org.firstinspires.ftc.teamcode.Constants.ANALOG_THRESHOLD;
-import static org.firstinspires.ftc.teamcode.Constants.ArmPos;
-import static org.firstinspires.ftc.teamcode.Constants.LiftPos;
-import static org.firstinspires.ftc.teamcode.Constants.TELEOP_STATE;
-
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
@@ -21,6 +16,11 @@ import org.firstinspires.ftc.teamcode.subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.triggers.AxisTrigger;
 import org.firstinspires.ftc.teamcode.triggers.JoystickTrigger;
 import org.firstinspires.ftc.teamcode.triggers.TeleopStateTrigger;
+
+import static org.firstinspires.ftc.teamcode.Constants.ANALOG_THRESHOLD;
+import static org.firstinspires.ftc.teamcode.Constants.ArmPos;
+import static org.firstinspires.ftc.teamcode.Constants.LiftPos;
+import static org.firstinspires.ftc.teamcode.Constants.TELEOP_STATE;
 
 public abstract class NewTeleopBase extends CommandOpMode {
     protected DriveSubsystem drive;
@@ -109,7 +109,11 @@ public abstract class NewTeleopBase extends CommandOpMode {
 
 
         ///////////////////////////// Gamepad 1 keybindings /////////////////////////////
-        gpad1LeftStick.whileActiveContinuous(driveCommand);  // TODO: 1/26/23 Check that this works with RoadRunner before using RoadRunner.
+        gpad1LeftStick
+                .or(gpad1LeftTrigger)
+                .or(gpad1RightTrigger)
+                .whileActiveContinuous(driveCommand)
+                .whenInactive(new InstantCommand(drive::stop, drive));  // TODO: 1/26/23 Check that this works with RoadRunner before using RoadRunner.
 
         gpad1.getGamepadButton(GamepadKeys.Button.B)  // Reset the Gyro
                 .whenActive(resetGyro);
@@ -181,9 +185,9 @@ public abstract class NewTeleopBase extends CommandOpMode {
 
     private void drive() {
         drive.drive(
-                gpad1.getLeftX(),
-                gpad1.getLeftY(),
-                gpad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) - gpad2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)
+                gpad1.getLeftX() / 2,
+                gpad1.getLeftY() / 2,
+                (gpad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) - gpad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)) / 2
         );
     }
 

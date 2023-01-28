@@ -18,15 +18,22 @@ public class SignalDetectionPipeline extends OpenCvPipeline {
     private int redMean;
     private int greenMean;
     private int blueMean;
+    private int instantRedMean;
+    private int instantGreenMean;
+    private int instantBlueMean;
     private int loops;
 
     private volatile SignalSide signalSide = SignalSide.SIDE_R;
+    private volatile SignalSide instantSignalSide = SignalSide.SIDE_R;
 
     void inputToCb(Mat input) {
         Scalar means = Core.mean(input.submat(ROI));
         redMean += (int) means.val[RED_CHANNEL];
         greenMean += (int) means.val[GREEN_CHANNEL];
         blueMean += (int) means.val[BLUE_CHANNEL];
+        instantRedMean = (int) means.val[RED_CHANNEL];
+        instantGreenMean = (int) means.val[GREEN_CHANNEL];
+        instantBlueMean = (int) means.val[BLUE_CHANNEL];
 
         loops++;
 
@@ -45,6 +52,16 @@ public class SignalDetectionPipeline extends OpenCvPipeline {
         if (greenMean > max) {
             signalSide = SignalSide.SIDE_P;
         }
+
+        max = instantRedMean;
+        instantSignalSide = SignalSide.SIDE_R;
+        if (instantBlueMean > max) {
+            max = instantBlueMean;
+            instantSignalSide = SignalSide.SIDE_B;
+        }
+        if (instantGreenMean > max) {
+            instantSignalSide = SignalSide.SIDE_P;
+        }
     }
 
     @Override
@@ -62,8 +79,8 @@ public class SignalDetectionPipeline extends OpenCvPipeline {
 
         // Add box to camera view
 
-        if (signalSide != null) {
-            Imgproc.rectangle(input, ROI, signalSide.color, 2);
+        if (instantSignalSide != null) {
+            Imgproc.rectangle(input, ROI, instantSignalSide.color, 2);
         } else {
             Imgproc.rectangle(input, ROI, YELLOW, 2);
         }
@@ -81,5 +98,9 @@ public class SignalDetectionPipeline extends OpenCvPipeline {
     public SignalSide getSignalSide()
     {
         return signalSide;
+    }
+
+    public int getLoops() {
+        return loops;
     }
 }

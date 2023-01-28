@@ -1,10 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
-import androidx.annotation.FloatRange;
-
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+
+import androidx.annotation.FloatRange;
 
 /**
  * Contains constants for all of the programs in one file for easy access.
@@ -117,7 +117,7 @@ public class Constants {
     public static final Scalar GREEN = new Scalar(0, 255, 0);
     public static final Scalar BLUE = new Scalar(0, 0, 255);
     public static final Scalar YELLOW = new Scalar(255, 255, 0);
-    public static final Rect ROI = new Rect(new Point(550,500), new Point(800,650));
+    public static final Rect ROI = new Rect(new Point(550,350), new Point(800,500));
     public static final int RED_CHANNEL = 0;
     public static final int GREEN_CHANNEL = 1;
     public static final int BLUE_CHANNEL = 2;

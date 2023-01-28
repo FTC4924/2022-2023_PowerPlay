@@ -17,6 +17,6 @@ public class JoystickTrigger extends Trigger {
     
     @Override
     public boolean get() {
-        return x.get() && y.get();
+        return x.get() || y.get();
     }
 }
