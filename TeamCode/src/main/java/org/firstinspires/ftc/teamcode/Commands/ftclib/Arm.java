@@ -22,17 +22,17 @@ public class Arm extends CommandBase {
 
     @Override
     public void initialize() {
-        armSubsystem.setArmPower(power);
-        armSubsystem.setArm(percent);
+        armSubsystem.setPower(power);
+        armSubsystem.setPos(percent);
     }
 
     @Override
     public boolean isFinished() {
-        return !armSubsystem.getArmBusy();
+        return !armSubsystem.isBusy();
     }
 
     @Override
     public void end(boolean interrupted) {
-        if (interrupted) armSubsystem.setArm(armSubsystem.getArmPos());
+        if (interrupted) armSubsystem.setPos(armSubsystem.getPos());
     }
 }

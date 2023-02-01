@@ -1,82 +1,51 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import static org.firstinspires.ftc.teamcode.Constants.ARM_RAISER_MAX_POSITION;
-import static org.firstinspires.ftc.teamcode.Constants.ARM_RAISER_MIN_POSITION;
-import static org.firstinspires.ftc.teamcode.Constants.ArmPos;
-import static org.firstinspires.ftc.teamcode.Constants.LiftPos;
-
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-public class ArmSubsystem extends SubsystemBase {
+import static org.firstinspires.ftc.teamcode.Constants.ArmPos;
 
-    private final DcMotorEx lift;
+public class ArmSubsystem extends SubsystemBase {
+    
     private final DcMotorEx arm;
-    private final DigitalChannel liftLimit;
     private final DigitalChannel armLimit;
-    private final Trigger liftPressed;
     private final Trigger armPressed;
-    private boolean liftOverride;
-    private int liftOffset;
     private int armOffset;
 
     private int armZeroMesurement;
     private int armZeroDirection;
 
-    public ArmSubsystem(HardwareMap hardwareMap, DcMotorEx lift, DcMotorEx arm, DigitalChannel liftLimit, DigitalChannel armLimit) {
-        this.lift = lift;
+    public ArmSubsystem(HardwareMap hardwareMap, DcMotorEx arm, DigitalChannel armLimit) {
         this.arm = arm;
-        this.liftLimit = liftLimit;
 
-        lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        lift.setTargetPosition(0);
-        lift.setDirection(DcMotorSimple.Direction.REVERSE);
         arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         arm.setTargetPosition(0);
-
-        liftLimit.setMode(DigitalChannel.Mode.INPUT);
+        arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        
         //this.armLimit.setMode(DigitalChannel.Mode.INPUT);
         this.armLimit = null; // TODO: 1/13/2023 Change for the addition of the arm limit switch
 
-        liftPressed = new Trigger(this::liftPressed).whenActive(this::resetLift).whenInactive(this::stopAndResetLift);
-        armPressed = new Trigger(this::armPressed).whenActive(this::resetArm).whenInactive(this::resetArm);
+        armPressed = new Trigger(this::pressed).whenActive(this::reset).whenInactive(this::reset);
     }
 
-    public ArmSubsystem(HardwareMap hardwareMap, String lift, String arm, String liftLimitSwitch, String armLimitSwitch) {
+    public ArmSubsystem(HardwareMap hardwareMap, String arm, String armLimitSwitch) {
         this(
                 hardwareMap,
-                hardwareMap.get(DcMotorEx.class, lift),
                 hardwareMap.get(DcMotorEx.class, arm),
-                hardwareMap.get(DigitalChannel.class, liftLimitSwitch),
                 null // TODO: 1/13/2023 Change for the addition of the arm limit switch
         );
     }
 
-    private boolean liftPressed() {
-        return !liftLimit.getState();
-    }
-
-    private boolean armPressed() { // TODO: 1/13/2023 Change for the addition of the arm limit switch
+    private boolean pressed() { // TODO: 1/13/2023 Change for the addition of the arm limit switch
         return false;//!armLimit.getState();
     }
 
-    private void resetLift() {
-        liftOffset = lift.getCurrentPosition();
-    }
-
-    private void stopAndResetLift() {
-        if (liftOverride) stopLift();
-        resetLift();
-    }
-
-    private void resetArm() {
+    private void reset() {
         if (armZeroDirection == 0) {  // Store the first value for zeroing the arm.
             armZeroMesurement = arm.getCurrentPosition();
             armZeroDirection = Integer.signum(arm.getTargetPosition() - arm.getCurrentPosition());
@@ -92,69 +61,31 @@ public class ArmSubsystem extends SubsystemBase {
         armZeroDirection = 0;
     }
 
-    public void setLift(LiftPos liftPos) {
-        setLift(liftPos.pos);
+    public void setPos(ArmPos armPos) {
+        setPos(armPos.pos);
     }
 
-    public void setLift(double percent) {
-        if (percent <= 0.0) zeroLift();
-        else setLift((int) Math.round((ARM_RAISER_MAX_POSITION - ARM_RAISER_MIN_POSITION) * percent) + ARM_RAISER_MIN_POSITION);
+    public void setPos(double percent) {
+        setPos((int) Math.round((ArmPos.ARM_SCORING.pos - ArmPos.ARM_COLLECTING.pos) * percent) + ArmPos.ARM_COLLECTING.pos);
     }
 
-    public void setLift(int pos) {
-        if (pos <= 0) zeroLift();
-        else lift.setTargetPosition(pos + liftOffset);
-    }
-
-    public void setLiftPower(double power) {
-        lift.setPower(power);
-    }
-
-    public void stopLift() {
-        lift.setTargetPosition(lift.getCurrentPosition());
-    }
-
-    public void zeroLift() {
-        lift.setTargetPosition(Integer.MIN_VALUE);
-    }
-
-    public void setArm(ArmPos armPos) {
-        setArm(armPos.pos);
-    }
-
-    public void setArm(double percent) {
-        setArm((int) Math.round((ArmPos.ARM_SCORING.pos - ArmPos.ARM_COLLECTING.pos) * percent) + ArmPos.ARM_COLLECTING.pos);
-    }
-
-    public void setArm(int pos) {
+    public void setPos(int pos) {
         arm.setTargetPosition(pos + armOffset);
     }
 
-    public void stopArm() {
+    public void stop() {
         arm.setTargetPosition(arm.getCurrentPosition());
     }
 
-    public void setArmPower(double power) {
+    public void setPower(double power) {
         arm.setPower(power);
     }
 
-    public int getLiftPos() {
-        return lift.getCurrentPosition();
-    }
-
-    public int getArmPos() {
+    public int getPos() {
         return arm.getCurrentPosition();
     }
 
-    public boolean getLiftBusy() {
-        return lift.isBusy();
-    }
-
-    public boolean getArmBusy() {
+    public boolean isBusy() {
         return arm.isBusy();
-    }
-
-    public void setLiftOverride(boolean override) {
-        liftOverride = override;
     }
 }
