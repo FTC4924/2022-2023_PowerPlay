@@ -9,23 +9,23 @@ import org.firstinspires.ftc.teamcode.subsystems.GripperSubsystem;
 import java.util.concurrent.TimeUnit;
 
 public class Gripper extends CommandBase {
-    private final GripperSubsystem armSubsystem;
+    private final GripperSubsystem gripper;
     private final double percent;
     private final Timer timer;
 
-    public Gripper(GripperSubsystem armSubsystem, GripperState armPos, double duration) {
-        this(armSubsystem, ((armPos == GripperState.CLOSE) ? 0 : 1), duration);
+    public Gripper(GripperSubsystem gripper, GripperState armPos, double duration) {
+        this(gripper, ((armPos == GripperState.CLOSE) ? 0 : 1), duration);
     }
 
-    public Gripper(GripperSubsystem armSubsystem, double percent, double duration) {
-        this.armSubsystem = armSubsystem;
+    public Gripper(GripperSubsystem gripper, double percent, double duration) {
+        this.gripper = gripper;
         this.percent = percent;
         timer = new Timer((int) Math.round(duration * 1000), TimeUnit.MILLISECONDS);
     }
 
     @Override
     public void initialize() {
-        armSubsystem.setPos(percent);
+        gripper.setPos(percent);
         timer.start();
     }
 

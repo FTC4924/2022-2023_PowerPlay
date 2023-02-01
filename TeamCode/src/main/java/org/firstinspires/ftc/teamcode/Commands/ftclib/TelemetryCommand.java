@@ -7,9 +7,9 @@ import com.arcrobotics.ftclib.command.WaitCommand;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 public class TelemetryCommand extends CommandBase {
-    private Telemetry telemetry;
-    private String msg;
-    private WaitCommand waitCommand;
+    private final Telemetry telemetry;
+    private final String msg;
+    private final WaitCommand waitCommand;
 
     public TelemetryCommand(Telemetry telemetry, String msg, long duration) {
         this.telemetry = telemetry;

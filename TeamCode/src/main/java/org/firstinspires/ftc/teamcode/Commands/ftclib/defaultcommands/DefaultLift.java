@@ -1,4 +1,6 @@
-package org.firstinspires.ftc.teamcode.Commands.ftclib;
+package org.firstinspires.ftc.teamcode.Commands.ftclib.defaultcommands;
+
+import static org.firstinspires.ftc.teamcode.Constants.ANALOG_THRESHOLD;
 
 import com.arcrobotics.ftclib.command.CommandBase;
 
@@ -8,8 +10,6 @@ import org.firstinspires.ftc.teamcode.subsystems.LiftSubsystem;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
-
-import static org.firstinspires.ftc.teamcode.Constants.ANALOG_THRESHOLD;
 
 public class DefaultLift extends CommandBase {
     private final LiftSubsystem lift;
@@ -43,8 +43,8 @@ public class DefaultLift extends CommandBase {
     }
 
     @Override
-    public boolean isFinished() {
-        return false;
+    public void end(boolean interrupted) {
+        lift.stop();
     }
 
     private void liftM() {

@@ -6,33 +6,33 @@ import org.firstinspires.ftc.teamcode.Constants.LiftPos;
 import org.firstinspires.ftc.teamcode.subsystems.LiftSubsystem;
 
 public class Lift extends CommandBase {
-    private final LiftSubsystem liftSubsystem;
+    private final LiftSubsystem lift;
     private final double percent;
     private final double power;
 
-    public Lift(LiftSubsystem liftSubsystem, LiftPos armPos, double power) {
-        this(liftSubsystem, ((armPos == LiftPos.LIFT_DOWN) ? 0 : 1), power);
+    public Lift(LiftSubsystem lift, LiftPos armPos, double power) {
+        this(lift, ((armPos == LiftPos.LIFT_DOWN) ? 0 : 1), power);
     }
 
-    public Lift(LiftSubsystem liftSubsystem, double percent, double power) {
-        this.liftSubsystem = liftSubsystem;
+    public Lift(LiftSubsystem lift, double percent, double power) {
+        this.lift = lift;
         this.percent = percent;
         this.power = power;
     }
 
     @Override
     public void initialize() {
-        liftSubsystem.setPower(power);
-        liftSubsystem.setPos(percent);
+        lift.setPower(power);
+        lift.setPos(percent);
     }
 
     @Override
     public boolean isFinished() {
-        return !liftSubsystem.isBusy();
+        return !lift.isBusy();
     }
 
     @Override
     public void end(boolean interrupted) {
-        if (interrupted) liftSubsystem.setPos(liftSubsystem.getPos());
+        if (interrupted) lift.setPos(lift.getPos());
     }
 }

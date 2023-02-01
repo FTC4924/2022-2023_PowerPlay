@@ -9,23 +9,23 @@ import org.firstinspires.ftc.teamcode.subsystems.WristSubsystem;
 import java.util.concurrent.TimeUnit;
 
 public class Wrist extends CommandBase {
-    private final WristSubsystem wristSubsystem;
+    private final WristSubsystem wrist;
     private final double percent;
     private final Timer timer;
 
-    public Wrist(WristSubsystem wristSubsystem, WristState armPos, double duration) {
-        this(wristSubsystem, ((armPos == WristState.SCORE) ? 0 : 1), duration);
+    public Wrist(WristSubsystem wrist, WristState armPos, double duration) {
+        this(wrist, ((armPos == WristState.SCORE) ? 0 : 1), duration);
     }
 
-    public Wrist(WristSubsystem wristSubsystem, double percent, double duration) {
-        this.wristSubsystem = wristSubsystem;
+    public Wrist(WristSubsystem wrist, double percent, double duration) {
+        this.wrist = wrist;
         this.percent = percent;
         timer = new Timer((int) Math.round(duration * 1000), TimeUnit.MILLISECONDS);
     }
 
     @Override
     public void initialize() {
-        wristSubsystem.setPos(percent);
+        wrist.setPos(percent);
         timer.start();
     }
 

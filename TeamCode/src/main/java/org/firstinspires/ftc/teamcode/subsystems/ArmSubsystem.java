@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import static org.firstinspires.ftc.teamcode.Constants.ArmPos;
+
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -7,17 +9,15 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import static org.firstinspires.ftc.teamcode.Constants.ArmPos;
-
 public class ArmSubsystem extends SubsystemBase {
     
     private final DcMotorEx arm;
     private final DigitalChannel armLimit;
-    private final Trigger armPressed;
     private int armOffset;
 
     private int armZeroMesurement;
     private int armZeroDirection;
+    private boolean ignoreLimitTemporary;
 
     public ArmSubsystem(HardwareMap hardwareMap, DcMotorEx arm, DigitalChannel armLimit) {
         this.arm = arm;
@@ -30,7 +30,9 @@ public class ArmSubsystem extends SubsystemBase {
         //this.armLimit.setMode(DigitalChannel.Mode.INPUT);
         this.armLimit = null; // TODO: 1/13/2023 Change for the addition of the arm limit switch
 
-        armPressed = new Trigger(this::pressed).whenActive(this::reset).whenInactive(this::reset);
+        ignoreLimitTemporary = pressed();
+
+        new Trigger(this::pressed).whenActive(this::reset).whenInactive(this::reset);
     }
 
     public ArmSubsystem(HardwareMap hardwareMap, String arm, String armLimitSwitch) {
@@ -46,6 +48,11 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     private void reset() {
+        if (ignoreLimitTemporary && !pressed()) {  // If the limit switch was triggered at the beginning of the program, ignore it until it is unpressed.
+            ignoreLimitTemporary = false;
+            return;
+        }
+
         if (armZeroDirection == 0) {  // Store the first value for zeroing the arm.
             armZeroMesurement = arm.getCurrentPosition();
             armZeroDirection = Integer.signum(arm.getTargetPosition() - arm.getCurrentPosition());
