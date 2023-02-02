@@ -38,8 +38,8 @@ import static org.firstinspires.ftc.teamcode.Constants.GripperState;
 import static org.firstinspires.ftc.teamcode.Constants.GripperState.CLOSE;
 import static org.firstinspires.ftc.teamcode.Constants.HOLONOMIC_SPEED;
 import static org.firstinspires.ftc.teamcode.Constants.LiftPos;
-import static org.firstinspires.ftc.teamcode.Constants.LiftPos.LIFT_DOWN;
-import static org.firstinspires.ftc.teamcode.Constants.LiftPos.LIFT_UP;
+import static org.firstinspires.ftc.teamcode.Constants.LiftPos.LIFT_MAX;
+import static org.firstinspires.ftc.teamcode.Constants.LiftPos.LIFT_MIN;
 import static org.firstinspires.ftc.teamcode.Constants.RESOLUTION_HEIGHT;
 import static org.firstinspires.ftc.teamcode.Constants.RESOLUTION_WIDTH;
 import static org.firstinspires.ftc.teamcode.Constants.TELEOP_STATE;
@@ -106,7 +106,7 @@ public abstract class TeleopBase extends OpMode {
         gripperState = CLOSE;
         wristState = COLLECT;
         armPos = ARM_SCORING;
-        liftPos = LIFT_UP;
+        liftPos = LIFT_MAX;
 
         /*Instantiating the motor and servo objects as their appropriate motor/servo in the
         configuration on the robot*/
@@ -481,11 +481,11 @@ public abstract class TeleopBase extends OpMode {
      */
     private void armRaise() {
         switch (liftPos) {
-            case LIFT_DOWN:
-                liftPos = LIFT_UP;
+            case LIFT_MIN:
+                liftPos = LIFT_MAX;
                 break;
-            case LIFT_UP:
-                liftPos = LIFT_DOWN;
+            case LIFT_MAX:
+                liftPos = LIFT_MIN;
                 break;
         }
         armRaiser.setTargetPosition(liftPos.pos);

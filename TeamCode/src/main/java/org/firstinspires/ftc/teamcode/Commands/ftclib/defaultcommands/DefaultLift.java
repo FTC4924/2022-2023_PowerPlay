@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.Commands.ftclib.defaultcommands;
 
-import static org.firstinspires.ftc.teamcode.Constants.ANALOG_THRESHOLD;
-
 import com.arcrobotics.ftclib.command.CommandBase;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -10,6 +8,8 @@ import org.firstinspires.ftc.teamcode.subsystems.LiftSubsystem;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
+
+import static org.firstinspires.ftc.teamcode.Constants.ANALOG_THRESHOLD;
 
 public class DefaultLift extends CommandBase {
     private final LiftSubsystem lift;
@@ -34,12 +34,11 @@ public class DefaultLift extends CommandBase {
             return;
         }
 
-        /*if (rStickButton.getAsBoolean()) {
+        if (rStickButton.getAsBoolean()) {
             liftO();
         } else {
             liftM();
-        }*/
-        liftM();
+        }
     }
 
     @Override
@@ -50,8 +49,8 @@ public class DefaultLift extends CommandBase {
     private void liftM() {
         lift.setOverride(true);
 
-        if (y.getAsDouble() > 0) lift.setPos(Constants.LiftPos.LIFT_UP);
-        else lift.setPos(Constants.LiftPos.LIFT_DOWN);
+        if (y.getAsDouble() > 0) lift.setPos(Constants.LiftPos.LIFT_MAX);
+        else lift.setPos(Constants.LiftPos.LIFT_MIN);
 
         lift.setPower(y.getAsDouble());
     }

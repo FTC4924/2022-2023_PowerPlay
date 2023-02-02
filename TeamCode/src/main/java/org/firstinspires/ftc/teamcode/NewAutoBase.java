@@ -38,7 +38,7 @@ public abstract class NewAutoBase extends CommandOpMode {
         arm = new ArmSubsystem(
                 hardwareMap,
                 "arm",
-                "null"  // TODO: 1/13/2023 Change for the addition of the arm limit switch
+                "armLimit"
         );
         
         lift = new LiftSubsystem(
@@ -46,6 +46,8 @@ public abstract class NewAutoBase extends CommandOpMode {
                 "lift",
                 "liftLimit"
         );
+
+        wrist = new WristSubsystem(hardwareMap, "wrist");
 
         camera = new Camera(hardwareMap, telemetry);
 

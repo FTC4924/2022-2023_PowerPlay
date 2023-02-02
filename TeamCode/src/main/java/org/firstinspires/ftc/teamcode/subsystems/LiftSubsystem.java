@@ -14,11 +14,13 @@ import static org.firstinspires.ftc.teamcode.Constants.ARM_RAISER_MAX_POSITION;
 import static org.firstinspires.ftc.teamcode.Constants.ARM_RAISER_MIN_POSITION;
 
 public class LiftSubsystem extends SubsystemBase {
+    private static final double DEFAULT_POWER = 0.5;
+
     private final DcMotorEx lift;
     private final DigitalChannel liftLimit;
-    private final Trigger liftPressed;
     private boolean liftOverride;
     private int liftOffset;
+    private boolean stopLift;
 
     public LiftSubsystem(HardwareMap hardwareMap, DcMotorEx lift, DigitalChannel liftLimit) {
         this.lift = lift;
@@ -30,9 +32,11 @@ public class LiftSubsystem extends SubsystemBase {
         lift.setDirection(DcMotorSimple.Direction.REVERSE);
         lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
+        lift.setPower(DEFAULT_POWER);
+
         liftLimit.setMode(DigitalChannel.Mode.INPUT);
 
-        liftPressed = new Trigger(this::limitPressed).whenActive(this::reset).whenInactive(this::stopAndReset);
+        new Trigger(this::limitPressed).whenActive(this::reset).whenInactive(this::stopAndReset);
     }
 
     public LiftSubsystem(HardwareMap hardwareMap, String lift, String liftLimitSwitch) {
@@ -68,6 +72,7 @@ public class LiftSubsystem extends SubsystemBase {
     public void setPos(int pos) {
         if (pos <= 0) zero();
         else lift.setTargetPosition(pos + liftOffset);
+        stopLift = false;
     }
 
     public void setPower(double power) {
@@ -75,7 +80,11 @@ public class LiftSubsystem extends SubsystemBase {
     }
 
     public void stop() {
-        lift.setTargetPosition(lift.getCurrentPosition());
+        if (!stopLift) {
+            lift.setTargetPosition(lift.getCurrentPosition());
+            lift.setPower(DEFAULT_POWER);
+        }
+        stopLift = true;
     }
 
     public void zero() {
@@ -83,7 +92,11 @@ public class LiftSubsystem extends SubsystemBase {
     }
 
     public int getPos() {
-        return lift.getCurrentPosition();
+        return lift.getCurrentPosition() - liftOffset;
+    }
+
+    public int getTargetPos() {
+        return lift.getTargetPosition() - liftOffset;
     }
 
     public boolean isBusy() {

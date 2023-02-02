@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import static org.firstinspires.ftc.teamcode.Constants.ArmPos;
-
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -9,7 +7,11 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import static org.firstinspires.ftc.teamcode.Constants.ArmPos;
+
 public class ArmSubsystem extends SubsystemBase {
+    private static final int ARM_RESET_OFFSET = -624;
+    private static final double DEFAULT_POWER = 0.5;
     
     private final DcMotorEx arm;
     private final DigitalChannel armLimit;
@@ -19,6 +21,8 @@ public class ArmSubsystem extends SubsystemBase {
     private int armZeroDirection;
     private boolean ignoreLimitTemporary;
 
+    private boolean stopArm;
+
     public ArmSubsystem(HardwareMap hardwareMap, DcMotorEx arm, DigitalChannel armLimit) {
         this.arm = arm;
 
@@ -26,9 +30,14 @@ public class ArmSubsystem extends SubsystemBase {
         arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         arm.setTargetPosition(0);
         arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        arm.setPower(DEFAULT_POWER);
+
+        //armOffset = ARM_RESET_OFFSET;
+
+        this.armLimit = armLimit;
         
-        //this.armLimit.setMode(DigitalChannel.Mode.INPUT);
-        this.armLimit = null; // TODO: 1/13/2023 Change for the addition of the arm limit switch
+        armLimit.setMode(DigitalChannel.Mode.INPUT);
 
         ignoreLimitTemporary = pressed();
 
@@ -39,12 +48,12 @@ public class ArmSubsystem extends SubsystemBase {
         this(
                 hardwareMap,
                 hardwareMap.get(DcMotorEx.class, arm),
-                null // TODO: 1/13/2023 Change for the addition of the arm limit switch
+                hardwareMap.get(DigitalChannel.class, armLimitSwitch)
         );
     }
 
-    private boolean pressed() { // TODO: 1/13/2023 Change for the addition of the arm limit switch
-        return false;//!armLimit.getState();
+    public boolean pressed() { // TODO: 1/13/2023 Change for the addition of the arm limit switch
+        return !armLimit.getState();
     }
 
     private void reset() {
@@ -64,7 +73,7 @@ public class ArmSubsystem extends SubsystemBase {
             return;
         }
 
-        armOffset = (arm.getCurrentPosition() + armZeroMesurement) / 2;
+        armOffset = -ARM_RESET_OFFSET + (arm.getCurrentPosition() + armZeroMesurement) / 2;
         armZeroDirection = 0;
     }
 
@@ -78,10 +87,15 @@ public class ArmSubsystem extends SubsystemBase {
 
     public void setPos(int pos) {
         arm.setTargetPosition(pos + armOffset);
+        stopArm = false;
     }
 
     public void stop() {
-        arm.setTargetPosition(arm.getCurrentPosition());
+        if (!stopArm) {
+            arm.setTargetPosition(arm.getCurrentPosition());
+            arm.setPower(DEFAULT_POWER);
+        }
+        stopArm = true;
     }
 
     public void setPower(double power) {
@@ -89,7 +103,11 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     public int getPos() {
-        return arm.getCurrentPosition();
+        return arm.getCurrentPosition() - armOffset;
+    }
+
+    public int getOffset() {
+        return armOffset;
     }
 
     public boolean isBusy() {

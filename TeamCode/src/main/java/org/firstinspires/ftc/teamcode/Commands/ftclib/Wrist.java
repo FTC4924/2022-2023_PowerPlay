@@ -13,8 +13,8 @@ public class Wrist extends CommandBase {
     private final double percent;
     private final Timer timer;
 
-    public Wrist(WristSubsystem wrist, WristState armPos, double duration) {
-        this(wrist, ((armPos == WristState.SCORE) ? 0 : 1), duration);
+    public Wrist(WristSubsystem wrist, WristState wristPos, double duration) {
+        this(wrist, ((wristPos == WristState.SCORE) ? 0 : 1), duration);
     }
 
     public Wrist(WristSubsystem wrist, double percent, double duration) {

@@ -14,10 +14,10 @@ public class MeepMeepInstall {
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(/*45.5148*/ 25, 73.17330064499293, Math.toRadians(343.4181), Math.toRadians(262.03258124999996), 9)
                 .followTrajectorySequence(drive -> drive.trajectorySequenceBuilder(new Pose2d(-32, -62, Math.toRadians(90)))  // Write Path Here
-                .strafeLeft(3)
-                .forward(25)
-                .strafeRight(25)
-                .forward(15)
+                        .strafeLeft(3)
+                        .forward(27)
+                                .strafeLeft(25)
+                                .forward(10)
                 .build()
                 );
 

@@ -12,6 +12,7 @@ public class GripperSubsystem extends SubsystemBase {
 
     public GripperSubsystem(HardwareMap hardwareMap, Servo gripper) {
         this.gripper = gripper;
+        setPos(0);
     }
 
     public GripperSubsystem(HardwareMap hardwareMap, String gripper) {

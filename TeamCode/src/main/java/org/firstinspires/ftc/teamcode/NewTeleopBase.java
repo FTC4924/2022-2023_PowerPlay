@@ -1,10 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import static org.firstinspires.ftc.teamcode.Constants.ANALOG_THRESHOLD;
-import static org.firstinspires.ftc.teamcode.Constants.ArmPos;
-import static org.firstinspires.ftc.teamcode.Constants.LiftPos;
-import static org.firstinspires.ftc.teamcode.Constants.TELEOP_STATE;
-
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
@@ -15,6 +10,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 
 import org.firstinspires.ftc.teamcode.Commands.ftclib.Arm;
+import org.firstinspires.ftc.teamcode.Commands.ftclib.Deliver;
 import org.firstinspires.ftc.teamcode.Commands.ftclib.Lift;
 import org.firstinspires.ftc.teamcode.Commands.ftclib.TelemetryCommand;
 import org.firstinspires.ftc.teamcode.Commands.ftclib.defaultcommands.DefaultArm;
@@ -28,6 +24,11 @@ import org.firstinspires.ftc.teamcode.subsystems.WristSubsystem;
 import org.firstinspires.ftc.teamcode.triggers.AxisTrigger;
 import org.firstinspires.ftc.teamcode.triggers.JoystickTrigger;
 import org.firstinspires.ftc.teamcode.triggers.TeleopStateTrigger;
+
+import static org.firstinspires.ftc.teamcode.Constants.ANALOG_THRESHOLD;
+import static org.firstinspires.ftc.teamcode.Constants.ArmPos;
+import static org.firstinspires.ftc.teamcode.Constants.LiftPos;
+import static org.firstinspires.ftc.teamcode.Constants.TELEOP_STATE;
 
 public abstract class NewTeleopBase extends CommandOpMode {
     protected DriveSubsystem drive;
@@ -70,7 +71,7 @@ public abstract class NewTeleopBase extends CommandOpMode {
         arm = new ArmSubsystem(
                 hardwareMap,
                 "arm",
-                "null"  // TODO: 1/13/2023 Change for the addition of the arm limit switch
+                "armLimit"
         );
 
         lift = new LiftSubsystem(
@@ -110,13 +111,13 @@ public abstract class NewTeleopBase extends CommandOpMode {
         Command armManual = new DefaultArm(arm, gpad2::getRightY);
         Command stopArm = new InstantCommand(arm::stop, arm);
 
-        Command liftUp = new Lift(lift, LiftPos.LIFT_UP, 0.75);
-        Command liftDown = new Lift(lift, LiftPos.LIFT_DOWN, 0.75);
+        Command liftUp = new Lift(lift, LiftPos.LIFT_MAX, 0.75);
+        Command liftDown = new Lift(lift, LiftPos.LIFT_MIN, 0.75);
         Command liftManual = new DefaultLift(lift, gpad2::getLeftY, gpad2.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON)::get, telemetry);
         Command stopLift = new InstantCommand(lift::stop, lift);
         Command zeroLift = new InstantCommand(lift::zero, lift);
 
-        Command driveCommand = new DefaultDrive(drive, gpad1::getLeftX, gpad1::getLeftY, this::getGpad1LeftTrigger, this::getGpad1RightTrigger);
+        Command driveCommand = new DefaultDrive(drive, gpad1::getLeftX, gpad1::getLeftY, this::getGpad1LeftTrigger, this::getGpad1RightTrigger, gpad1.getGamepadButton(GamepadKeys.Button.Y)::get);
         Command resetGyro = new InstantCommand(drive::resetGyro);
 
 
@@ -126,9 +127,9 @@ public abstract class NewTeleopBase extends CommandOpMode {
                 .or(gpad1RightTrigger)
                 .whileActiveContinuous(driveCommand)
                 .whenInactive(new InstantCommand(drive::stop, drive));  // TODO: 1/26/23 Check that this works with RoadRunner before using RoadRunner.
-
+*/
         gpad1.getGamepadButton(GamepadKeys.Button.B)  // Reset the Gyro
-                .whenActive(resetGyro);*/
+                .whenActive(resetGyro);
 
 
         ///////////////////////////// Gamepad 2 keybindings /////////////////////////////
@@ -169,6 +170,9 @@ public abstract class NewTeleopBase extends CommandOpMode {
                 .and(stateManual)
                 .whenActive(zeroLift);
 
+        gpad2.getGamepadButton(GamepadKeys.Button.A)  // Zero the Lift
+                .whenActive(new Deliver(arm, lift, wrist, gripper));
+
 
         register(drive, gripper, wrist, arm, lift);  /*roadRunner,*/
 
@@ -189,6 +193,10 @@ public abstract class NewTeleopBase extends CommandOpMode {
                 .and(stateManual)
                 .get()
         );
+        telemetry.addData("Lift Pos", lift.getPos());
+        telemetry.addData("Arm Pos", arm.getPos());
+        telemetry.addData("Arm Offset", arm.getOffset());
+        telemetry.addData("Arm Pressed", arm.pressed());
         telemetry.update();
     }
 

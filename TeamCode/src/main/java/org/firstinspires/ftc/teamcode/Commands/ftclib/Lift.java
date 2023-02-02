@@ -11,7 +11,7 @@ public class Lift extends CommandBase {
     private final double power;
 
     public Lift(LiftSubsystem lift, LiftPos armPos, double power) {
-        this(lift, ((armPos == LiftPos.LIFT_DOWN) ? 0 : 1), power);
+        this(lift, ((armPos == LiftPos.LIFT_MIN) ? 0 : 1), power);
     }
 
     public Lift(LiftSubsystem lift, double percent, double power) {
