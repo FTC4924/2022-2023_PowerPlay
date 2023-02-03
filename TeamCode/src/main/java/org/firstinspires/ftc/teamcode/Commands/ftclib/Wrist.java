@@ -21,6 +21,8 @@ public class Wrist extends CommandBase {
         this.wrist = wrist;
         this.percent = percent;
         timer = new Timer((int) Math.round(duration * 1000), TimeUnit.MILLISECONDS);
+
+        addRequirements(wrist);
     }
 
     @Override

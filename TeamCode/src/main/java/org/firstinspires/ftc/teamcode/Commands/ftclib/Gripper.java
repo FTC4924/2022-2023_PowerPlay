@@ -21,6 +21,7 @@ public class Gripper extends CommandBase {
         this.gripper = gripper;
         this.percent = percent;
         timer = new Timer((int) Math.round(duration * 1000), TimeUnit.MILLISECONDS);
+        addRequirements(gripper);
     }
 
     @Override

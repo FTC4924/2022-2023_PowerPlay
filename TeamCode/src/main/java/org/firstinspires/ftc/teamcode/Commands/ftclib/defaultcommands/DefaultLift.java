@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode.Commands.ftclib.defaultcommands;
 
 import com.arcrobotics.ftclib.command.CommandBase;
+import com.arcrobotics.ftclib.command.CommandScheduler;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.Commands.ftclib.TelemetryCommand;
 import org.firstinspires.ftc.teamcode.Constants;
 import org.firstinspires.ftc.teamcode.subsystems.LiftSubsystem;
 
@@ -43,6 +45,7 @@ public class DefaultLift extends CommandBase {
 
     @Override
     public void end(boolean interrupted) {
+        CommandScheduler.getInstance().schedule(new TelemetryCommand(telemetry, "Lift End method: " + interrupted, 5));
         lift.stop();
     }
 

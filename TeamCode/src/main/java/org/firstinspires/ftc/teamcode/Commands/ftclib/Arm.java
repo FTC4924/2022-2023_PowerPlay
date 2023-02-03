@@ -18,6 +18,8 @@ public class Arm extends CommandBase {
         this.arm = arm;
         this.percent = percent;
         this.power = power;
+
+        addRequirements(arm);
     }
 
     @Override

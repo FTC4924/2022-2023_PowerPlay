@@ -16,7 +16,7 @@ public class Deliver extends SequentialCommandGroup {
 
 
     public Deliver(ArmSubsystem arm, LiftSubsystem lift, WristSubsystem wrist, GripperSubsystem gripper) {
-        addCommands(
+        super(
                 /*new ParallelCommandGroup(
                         new Lift(lift, 0.25, 0.5),
                         new Wrist(wrist, WristState.SCORE, 1)
