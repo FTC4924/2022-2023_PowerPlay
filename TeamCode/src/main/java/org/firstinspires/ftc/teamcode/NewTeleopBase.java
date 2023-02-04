@@ -10,6 +10,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 
 import org.firstinspires.ftc.teamcode.Commands.ftclib.Arm;
+import org.firstinspires.ftc.teamcode.Commands.ftclib.Collect;
 import org.firstinspires.ftc.teamcode.Commands.ftclib.Deliver;
 import org.firstinspires.ftc.teamcode.Commands.ftclib.Lift;
 import org.firstinspires.ftc.teamcode.Commands.ftclib.TelemetryCommand;
@@ -160,8 +161,7 @@ public abstract class NewTeleopBase extends CommandOpMode {
                         )
                 );
 
-        gpad2.getGamepadButton(GamepadKeys.Button.B)  // Actuate the Wrist
-                .or(gpad2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER))
+        gpad2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)  // Actuate the Wrist
                 .and(stateManual)
                 .whenActive(wristToggle);
 
@@ -173,6 +173,9 @@ public abstract class NewTeleopBase extends CommandOpMode {
 
         gpad2.getGamepadButton(GamepadKeys.Button.A)  // Zero the Lift
                 .whenActive(new Deliver(arm, lift, wrist, gripper));
+
+        gpad2.getGamepadButton(GamepadKeys.Button.B)
+                .whenActive(new Collect(arm, lift, wrist, gripper));
 
 
         register(drive, gripper, wrist, arm, lift);  /*roadRunner,*/

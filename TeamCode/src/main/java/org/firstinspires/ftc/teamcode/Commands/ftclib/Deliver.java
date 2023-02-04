@@ -22,10 +22,21 @@ public class Deliver extends SequentialCommandGroup {
                         new Lift(lift, 0.25, 0.5),
                         new Wrist(wrist, WristState.SCORE, 1)
                 ),
-               new ParallelCommandGroup(
+                new ParallelCommandGroup(
                         new Lift(lift, 0.95, 0.5),
                         new Arm(arm, ArmPos.ARM_SCORING, 0.5)
                 )
+                /*Lift liftMax = new Lift(lift, 0.95, 0.5);
+        addCommands(
+                new ParallelCommandGroup(
+                        new SequentialCommandGroup(
+                                new Lift(lift, 0.25, 0.5),
+                                new ScheduleCommand(liftMax)
+                        ),
+                        new Wrist(wrist, WristState.SCORE, 1)
+                ),
+                new Arm(arm, ArmPos.ARM_SCORING, 0.5),
+                new WaitUntilCommand(liftMax::isFinished)*/
                 /*new Lift(lift, LiftPos.LIFT_SCORING, 0.5),
                 new Wrist(wrist, WristState.SCORE, 0.5)/*,
                 new Arm(arm, ArmPos.ARM_SCORING, 0.5)*/
