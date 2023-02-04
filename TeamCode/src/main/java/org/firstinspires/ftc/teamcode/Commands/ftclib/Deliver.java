@@ -23,7 +23,7 @@ public class Deliver extends SequentialCommandGroup {
                         new Wrist(wrist, WristState.SCORE, 1)
                 ),
                new ParallelCommandGroup(
-                        new Lift(lift, 1, 0.5),
+                        new Lift(lift, 0.95, 0.5),
                         new Arm(arm, ArmPos.ARM_SCORING, 0.5)
                 )
                 /*new Lift(lift, LiftPos.LIFT_SCORING, 0.5),

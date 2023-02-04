@@ -170,6 +170,7 @@ public abstract class NewTeleopBase extends CommandOpMode {
                 .and(stateManual)
                 .whenActive(zeroLift);
 
+
         gpad2.getGamepadButton(GamepadKeys.Button.A)  // Zero the Lift
                 .whenActive(new Deliver(arm, lift, wrist, gripper));
 
