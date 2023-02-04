@@ -60,9 +60,9 @@ public class Constants {
     }
 
     public enum LiftPos {
-        LIFT_MAX(2350),
+        LIFT_MAX(2300),
         LIFT_MIN(20),
-        LIFT_SCORING(2250),
+        LIFT_SCORING(2200),
         LIFT_COLLECT(130);
 
         public final int pos;

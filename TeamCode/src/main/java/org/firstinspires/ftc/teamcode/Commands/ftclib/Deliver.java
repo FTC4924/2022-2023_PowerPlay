@@ -1,8 +1,9 @@
 package org.firstinspires.ftc.teamcode.Commands.ftclib;
 
+import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 
-import org.firstinspires.ftc.teamcode.Constants.LiftPos;
+import org.firstinspires.ftc.teamcode.Constants.ArmPos;
 import org.firstinspires.ftc.teamcode.Constants.WristState;
 import org.firstinspires.ftc.teamcode.subsystems.ArmSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.GripperSubsystem;
@@ -17,15 +18,15 @@ public class Deliver extends SequentialCommandGroup {
 
     public Deliver(ArmSubsystem arm, LiftSubsystem lift, WristSubsystem wrist, GripperSubsystem gripper) {
         super(
-                /*new ParallelCommandGroup(
+                new ParallelCommandGroup(
                         new Lift(lift, 0.25, 0.5),
                         new Wrist(wrist, WristState.SCORE, 1)
                 ),
-                new ParallelCommandGroup(
+               new ParallelCommandGroup(
                         new Lift(lift, 1, 0.5),
                         new Arm(arm, ArmPos.ARM_SCORING, 0.5)
-                ),*/
-                new Lift(lift, LiftPos.LIFT_SCORING, 0.5),
+                )
+                /*new Lift(lift, LiftPos.LIFT_SCORING, 0.5),
                 new Wrist(wrist, WristState.SCORE, 0.5)/*,
                 new Arm(arm, ArmPos.ARM_SCORING, 0.5)*/
 
