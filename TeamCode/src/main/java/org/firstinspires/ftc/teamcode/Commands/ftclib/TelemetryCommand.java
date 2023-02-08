@@ -11,7 +11,7 @@ public class TelemetryCommand extends CommandBase {
     private final String msg;
     private final WaitCommand waitCommand;
 
-    public TelemetryCommand(Telemetry telemetry, String msg, long duration) {
+    public TelemetryCommand(Telemetry telemetry, String msg, double duration) {
         this.telemetry = telemetry;
         this.msg = msg;
         waitCommand = new WaitCommand((long) (duration * 1000));

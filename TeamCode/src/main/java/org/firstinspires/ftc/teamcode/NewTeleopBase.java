@@ -2,10 +2,10 @@ package org.firstinspires.ftc.teamcode;
 
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandOpMode;
+import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 
@@ -24,12 +24,10 @@ import org.firstinspires.ftc.teamcode.subsystems.LiftSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.WristSubsystem;
 import org.firstinspires.ftc.teamcode.triggers.AxisTrigger;
 import org.firstinspires.ftc.teamcode.triggers.JoystickTrigger;
-import org.firstinspires.ftc.teamcode.triggers.TeleopStateTrigger;
 
 import static org.firstinspires.ftc.teamcode.Constants.ANALOG_THRESHOLD;
 import static org.firstinspires.ftc.teamcode.Constants.ArmPos;
 import static org.firstinspires.ftc.teamcode.Constants.LiftPos;
-import static org.firstinspires.ftc.teamcode.Constants.TELEOP_STATE;
 
 public abstract class NewTeleopBase extends CommandOpMode {
     protected DriveSubsystem drive;
@@ -39,14 +37,11 @@ public abstract class NewTeleopBase extends CommandOpMode {
     protected LiftSubsystem lift;
     //protected RoadRunnerSubsystem roadRunner;
 
+    private Deliver deliverCommand;
+    private Collect collectCommand;
+
     private GamepadEx gpad1;
     private GamepadEx gpad2;
-
-    private TELEOP_STATE teleopState;
-
-    private Trigger stateManual;
-    private Trigger stateAuto;
-    private Trigger stateTest;
 
     @SuppressWarnings("FieldCanBeLocal")
     private AllianceColor alliance;
@@ -80,12 +75,6 @@ public abstract class NewTeleopBase extends CommandOpMode {
                 "lift",
                 "liftLimit"
         );
-
-        teleopState = TELEOP_STATE.MANUAL;
-
-        stateManual = new TeleopStateTrigger(this::getTeleopState, TELEOP_STATE.MANUAL);
-        stateAuto = new TeleopStateTrigger(this::getTeleopState, TELEOP_STATE.AUTO);
-        stateTest = new TeleopStateTrigger(this::getTeleopState, TELEOP_STATE.TEST);
 
         gpad1 = new GamepadEx(gamepad1);
         gpad2 = new GamepadEx(gamepad2);
@@ -121,6 +110,9 @@ public abstract class NewTeleopBase extends CommandOpMode {
         Command driveCommand = new DefaultDrive(drive, gpad1::getLeftX, gpad1::getLeftY, this::getGpad1LeftTrigger, this::getGpad1RightTrigger, gpad1.getGamepadButton(GamepadKeys.Button.Y)::get);
         Command resetGyro = new InstantCommand(drive::resetGyro);
 
+        deliverCommand = new Deliver(arm, lift, wrist, gripper);
+        collectCommand = new Collect(arm, lift, wrist, gripper);
+
 
         ///////////////////////////// Gamepad 1 keybindings /////////////////////////////
         /*gpad1LeftStick
@@ -144,12 +136,10 @@ public abstract class NewTeleopBase extends CommandOpMode {
                 .whenInactive(stopArm);*/
 
         gpad2.getGamepadButton(GamepadKeys.Button.X)
-                .and(stateManual)
-                .whenInactive(this::configureState);  // Toggle the active state
+                .whenInactive(this::cancelAll);  // Toggle the active state
 
         gpad2.getGamepadButton(GamepadKeys.Button.Y)  // Actuate the Gripper
                 .or(gpad2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER))
-                .and(stateManual)
                 .toggleWhenActive(
                         new SequentialCommandGroup(
                                 new InstantCommand(gripper::close, gripper),
@@ -162,20 +152,18 @@ public abstract class NewTeleopBase extends CommandOpMode {
                 );
 
         gpad2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)  // Actuate the Wrist
-                .and(stateManual)
                 .whenActive(wristToggle);
 
         gpad2.getGamepadButton(GamepadKeys.Button.DPAD_UP)  // Zero the Lift
                 .and(gpad2RightTrigger)
-                .and(stateManual)
                 .whenActive(zeroLift);
 
 
         gpad2.getGamepadButton(GamepadKeys.Button.A)  // Zero the Lift
-                .whenActive(new Deliver(arm, lift, wrist, gripper));
+                .whenActive(deliverCommand);
 
         gpad2.getGamepadButton(GamepadKeys.Button.B)
-                .whenActive(new Collect(arm, lift, wrist, gripper));
+                .whenActive(collectCommand);
 
 
         register(drive, gripper, wrist, arm, lift);  /*roadRunner,*/
@@ -194,7 +182,6 @@ public abstract class NewTeleopBase extends CommandOpMode {
         super.run();
         telemetry.addData("Manual State", gpad2.getGamepadButton(GamepadKeys.Button.Y)  // Actuate the Gripper
                 .or(gpad2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER))
-                .and(stateManual)
                 .get()
         );
         telemetry.addData("Lift Pos", lift.getPos());
@@ -223,24 +210,6 @@ public abstract class NewTeleopBase extends CommandOpMode {
         );
     }*/
 
-    private void configureState() {
-        switch (teleopState) {
-            case MANUAL:
-                teleopState = TELEOP_STATE.AUTO;
-                break;
-            case AUTO:
-                teleopState = TELEOP_STATE.MANUAL;
-                break;
-            case TEST:
-                teleopState = TELEOP_STATE.MANUAL;
-                break;
-        }
-    }
-
-    private TELEOP_STATE getTeleopState() {
-        return teleopState;
-    }
-
     private double getGpad1LeftTrigger() {
         return gpad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
     }
@@ -255,6 +224,10 @@ public abstract class NewTeleopBase extends CommandOpMode {
 
     private double getGpad2RightTrigger() {
         return gpad2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+    }
+
+    private void cancelAll() {
+        CommandScheduler.getInstance().cancel(deliverCommand, collectCommand);
     }
 
     protected abstract AllianceColor getAlliance();

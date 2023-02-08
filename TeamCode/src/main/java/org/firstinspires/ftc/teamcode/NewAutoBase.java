@@ -54,6 +54,8 @@ public abstract class NewAutoBase extends CommandOpMode {
         schedule(new InstantCommand().andThen(getCommands()));
 
         register(drive, gripper, wrist, roadRunner, arm, lift);
+
+        telemetry.update();
     }
     
     public void setRoadRunnerStart(Pose2d pose2d) {

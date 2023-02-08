@@ -37,9 +37,9 @@ public class SignalDetectionPipeline extends OpenCvPipeline {
 
         loops++;
 
-        redMean /= loops;
+        /*redMean /= loops;
         greenMean /= loops;
-        blueMean /= loops;
+        blueMean /= loops;*/
     }
 
     private void maxAverage() {
