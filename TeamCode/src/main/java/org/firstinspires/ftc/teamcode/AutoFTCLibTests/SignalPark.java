@@ -23,7 +23,7 @@ public class SignalPark extends NewAutoBase {
                 .build();
 
         TrajectorySequence leftTrajectory = roadRunner.trajectorySequenceBuilder(forwardTrajecory.end())
-                .strafeLeft(20)
+                .strafeLeft(25)
                 .forward(10)
                 .build();
 

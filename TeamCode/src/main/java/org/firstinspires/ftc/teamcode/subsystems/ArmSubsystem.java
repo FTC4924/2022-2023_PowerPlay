@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
-import com.arcrobotics.ftclib.command.button.Trigger;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -41,7 +40,7 @@ public class ArmSubsystem extends SubsystemBase {
 
         ignoreLimitTemporary = pressed();
 
-        new Trigger(this::pressed).whenActive(this::reset).whenInactive(this::reset);
+        //new Trigger(this::pressed).whenActive(this::reset)/*.whenInactive(this::reset)*/;
     }
 
     public ArmSubsystem(HardwareMap hardwareMap, String arm, String armLimitSwitch) {
@@ -57,7 +56,8 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     private void reset() {
-        if (ignoreLimitTemporary && !pressed()) {  // If the limit switch was triggered at the beginning of the program, ignore it until it is unpressed.
+        armOffset = -ARM_RESET_OFFSET + arm.getCurrentPosition() + armZeroMesurement;
+        /*if (ignoreLimitTemporary && !pressed()) {  // If the limit switch was triggered at the beginning of the program, ignore it until it is unpressed.
             ignoreLimitTemporary = false;
             return;
         }
@@ -68,13 +68,11 @@ public class ArmSubsystem extends SubsystemBase {
             return;
         }
 
-        if (Integer.signum(arm.getTargetPosition() - arm.getCurrentPosition()) != armZeroDirection) {  // Detect if we have not reversed and come back out the other direction.
-            armZeroDirection = 0;
-            return;
+        if (Integer.signum(arm.getTargetPosition() - arm.getCurrentPosition()) == armZeroDirection) {  // Detect if we have not reversed and come back out the other direction.
+            armOffset = -ARM_RESET_OFFSET + (arm.getCurrentPosition() + armZeroMesurement) / 2;
         }
 
-        armOffset = -ARM_RESET_OFFSET + (arm.getCurrentPosition() + armZeroMesurement) / 2;
-        armZeroDirection = 0;
+        armZeroDirection = 0;*/
     }
 
     public void setPos(ArmPos armPos) {

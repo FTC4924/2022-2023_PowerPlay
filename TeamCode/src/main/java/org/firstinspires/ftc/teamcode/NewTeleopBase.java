@@ -140,6 +140,7 @@ public abstract class NewTeleopBase extends CommandOpMode {
 
         gpad2.getGamepadButton(GamepadKeys.Button.Y)  // Actuate the Gripper
                 .or(gpad2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER))
+                .or(gpad2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER))
                 .toggleWhenActive(
                         new SequentialCommandGroup(
                                 new InstantCommand(gripper::close, gripper),

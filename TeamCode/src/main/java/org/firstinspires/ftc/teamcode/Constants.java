@@ -64,7 +64,7 @@ public class Constants {
         LIFT_MIN(20),
         LIFT_POLE_CLEAR(2200),
         LIFT_ARM_CLEAR(570),
-        LIFT_SCORING(2050),
+        LIFT_SCORING(2250),
         LIFT_COLLECT(60);
 
         public final int pos;
@@ -75,8 +75,8 @@ public class Constants {
     }
 
     public enum ArmPos {
-        ARM_SCORING(/*2193*/ -1204),
-        ARM_COLLECTING(/*-2250*/ 975),
+        ARM_SCORING(/*2193*/ -1200),
+        ARM_COLLECTING(/*-2250*/ 800),
         ARM_MAX(2750),
         ARM_MIN(-2750);
 
